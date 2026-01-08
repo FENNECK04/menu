@@ -201,7 +201,7 @@
 	font-size: 11px;
 	text-transform: uppercase;
 	letter-spacing: 0.08em;
-	color: #666;
+	color: #b7b7b7;
 }
 
 .ivm__trending-items {
@@ -215,7 +215,7 @@
 	align-items: center;
 	padding: 4px 10px;
 	border-radius: 999px;
-	background: var(--ivm-hover);
+	background: rgba(255, 255, 255, 0.08);
 	color: inherit;
 	text-decoration: none;
 	font-size: 12px;
@@ -237,7 +237,7 @@
 .ivm__footer {
 	margin-top: 16px;
 	font-size: 11px;
-	color: #666;
+	color: #9b9b9b;
 }
 
 .ivm__meta {
@@ -289,7 +289,7 @@
 
 .ivm__date {
 	font-size: 12px;
-	color: #555;
+	color: #b7b7b7;
 }
 
 .ivm__newsletter {

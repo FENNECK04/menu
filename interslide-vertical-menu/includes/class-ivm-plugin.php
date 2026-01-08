@@ -52,25 +52,25 @@ class Interslide_Vertical_Menu_Plugin {
 			'primary_items'      => $this->get_default_primary_items(),
 			'secondary_items'    => $this->get_default_secondary_items(),
 			'bottom_items'       => $this->get_default_bottom_items(),
-			'background_color'   => '#ffffff',
-			'text_color'         => '#111111',
-			'hover_color'        => '#f2f2f2',
+			'background_color'   => '#0f0f10',
+			'text_color'         => '#f5f5f5',
+			'hover_color'        => '#1a1b1d',
 			'pill_color'         => '#2f6feb',
-			'divider_color'      => '#e5e5e5',
+			'divider_color'      => '#26282b',
 			'font_family'        => '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
 			'font_size'          => 14,
 			'link_padding_y'     => 6,
 			'link_padding_x'     => 8,
 			'border_radius'      => 8,
 			'panel_shadow'       => 0,
-			'header_bg'          => '#111111',
-			'header_text_color'  => '#ffffff',
-			'toggle_color'       => '#111111',
+			'header_bg'          => '#0f0f10',
+			'header_text_color'  => '#f5f5f5',
+			'toggle_color'       => '#f5f5f5',
 			'sidebar_width'      => 280,
 			'mobile_breakpoint'  => 900,
 			'search_mode'        => 'link',
 			'search_url'         => home_url( '/' ),
-			'edition_enabled'    => 0,
+			'edition_enabled'    => 1,
 			'edition_options'    => $this->get_default_editions(),
 			'edition_default'    => 0,
 			'breaking_enabled'   => 0,
@@ -1334,8 +1334,8 @@ class Interslide_Vertical_Menu_Plugin {
 
 	private function get_default_bottom_items() {
 		return array(
-			array( 'label' => __( 'Annonceurs', 'interslide-vertical-menu' ), 'url' => home_url( '/annonceurs/' ) ),
-			array( 'label' => __( 'Nous rejoindre', 'interslide-vertical-menu' ), 'url' => home_url( '/nous-rejoindre/' ) ),
+			array( 'label' => __( 'Annonceurs', 'interslide-vertical-menu' ), 'url' => 'https://interslide.afrique.media/annonceurs/' ),
+			array( 'label' => __( 'Nous rejoindre', 'interslide-vertical-menu' ), 'url' => 'https://interslide.media/nous-rejoindre/' ),
 		);
 	}
 
@@ -1356,8 +1356,10 @@ class Interslide_Vertical_Menu_Plugin {
 
 	private function get_default_editions() {
 		return array(
-			array( 'label' => __( 'Édition marocaine', 'interslide-vertical-menu' ), 'url' => home_url( '/' ) ),
-			array( 'label' => __( 'Édition française', 'interslide-vertical-menu' ), 'url' => home_url( '/fr/' ) ),
+			array( 'label' => __( 'Édition Maroc', 'interslide-vertical-menu' ), 'url' => 'https://interslide.ma/' ),
+			array( 'label' => __( 'Édition France', 'interslide-vertical-menu' ), 'url' => 'https://interslide.fr/' ),
+			array( 'label' => __( 'Édition International', 'interslide-vertical-menu' ), 'url' => 'https://interslide.com/' ),
+			array( 'label' => __( 'Édition Afrique', 'interslide-vertical-menu' ), 'url' => 'https://interslide.afrique.media/' ),
 		);
 	}
 
