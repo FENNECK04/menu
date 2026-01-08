@@ -38,6 +38,8 @@
 	padding: 24px 20px;
 	box-shadow: var(--ivm-shadow);
 	z-index: 10000;
+	display: flex;
+	flex-direction: column;
 }
 
 .ivm__logo {
@@ -70,6 +72,16 @@
 .ivm__header {
 	margin-bottom: 20px;
 	padding-top: 16px;
+}
+
+.ivm__content {
+	display: flex;
+	flex-direction: column;
+	flex: 1;
+}
+
+.ivm__content-bottom {
+	margin-top: auto;
 }
 
 .ivm__section {

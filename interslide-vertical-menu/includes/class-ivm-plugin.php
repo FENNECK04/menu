@@ -89,6 +89,8 @@ class Interslide_Vertical_Menu_Plugin {
 			'account_text'       => __( 'Sign in', 'interslide-vertical-menu' ),
 			'account_url'        => wp_login_url(),
 			'footer_text'        => '',
+			'section_order'      => 'utility,meta,primary,trending,divider,secondary,search,divider,bottom,newsletter,account,edition,footer',
+			'bottom_sections'    => array( 'newsletter', 'account', 'edition', 'footer' ),
 			'mobile_menu_id'     => 0,
 			'use_wp_menus'       => 1,
 			'primary_menu_id'    => 0,
@@ -282,6 +284,26 @@ class Interslide_Vertical_Menu_Plugin {
 			__( 'Menu Items', 'interslide-vertical-menu' ),
 			'__return_false',
 			'interslide-vertical-menu'
+		);
+
+		add_settings_field(
+			'section_order',
+			__( 'Section order', 'interslide-vertical-menu' ),
+			array( $this, 'render_text_field' ),
+			'interslide-vertical-menu',
+			'ivm_menu_items',
+			array(
+				'label_for'  => 'ivm_section_order',
+				'option_key' => 'section_order',
+			)
+		);
+
+		add_settings_field(
+			'bottom_sections',
+			__( 'Bottom-aligned sections', 'interslide-vertical-menu' ),
+			array( $this, 'render_bottom_sections_field' ),
+			'interslide-vertical-menu',
+			'ivm_menu_items'
 		);
 
 		add_settings_field(
@@ -971,6 +993,8 @@ class Interslide_Vertical_Menu_Plugin {
 		$output['account_text']         = sanitize_text_field( $input['account_text'] ?? $defaults['account_text'] );
 		$output['account_url']          = esc_url_raw( $input['account_url'] ?? $defaults['account_url'] );
 		$output['footer_text']          = wp_kses_post( $input['footer_text'] ?? $defaults['footer_text'] );
+		$output['section_order']        = $this->sanitize_section_order( $input['section_order'] ?? $defaults['section_order'] );
+		$output['bottom_sections']      = $this->sanitize_bottom_sections( $input['bottom_sections'] ?? $defaults['bottom_sections'] );
 		$output['mobile_menu_id']       = absint( $input['mobile_menu_id'] ?? 0 );
 		$output['use_wp_menus']         = isset( $input['use_wp_menus'] ) ? 1 : 0;
 		$output['primary_menu_id']      = absint( $input['primary_menu_id'] ?? 0 );
@@ -1006,6 +1030,80 @@ class Interslide_Vertical_Menu_Plugin {
 		$value = sanitize_text_field( $value );
 		$value = preg_replace( '/[^\\w\\s\\#\\.\\,\\-\\[\\]\\=\\\"\\:\\*\\>\\+\\~\\(\\)\\@]/', '', $value );
 		return trim( $value );
+	}
+
+	private function get_section_keys() {
+		return array(
+			'utility',
+			'meta',
+			'primary',
+			'trending',
+			'divider',
+			'secondary',
+			'search',
+			'bottom',
+			'newsletter',
+			'account',
+			'edition',
+			'footer',
+		);
+	}
+
+	private function get_section_labels() {
+		return array(
+			'utility'    => __( 'Utility links', 'interslide-vertical-menu' ),
+			'meta'       => __( 'Breaking/live/date', 'interslide-vertical-menu' ),
+			'primary'    => __( 'Primary menu', 'interslide-vertical-menu' ),
+			'trending'   => __( 'Trending topics', 'interslide-vertical-menu' ),
+			'divider'    => __( 'Divider', 'interslide-vertical-menu' ),
+			'secondary'  => __( 'Secondary menu', 'interslide-vertical-menu' ),
+			'search'     => __( 'Search', 'interslide-vertical-menu' ),
+			'bottom'     => __( 'Bottom menu', 'interslide-vertical-menu' ),
+			'newsletter' => __( 'Newsletter link', 'interslide-vertical-menu' ),
+			'account'    => __( 'Account link', 'interslide-vertical-menu' ),
+			'edition'    => __( 'Edition selector', 'interslide-vertical-menu' ),
+			'footer'     => __( 'Footer text', 'interslide-vertical-menu' ),
+		);
+	}
+
+	private function get_section_order( $settings ) {
+		$defaults = $this->get_default_settings();
+		$order = $settings['section_order'] ?? '';
+		$order = $this->sanitize_section_order( $order );
+		if ( '' === $order ) {
+			$order = $this->sanitize_section_order( $defaults['section_order'] );
+		}
+		$items = array_filter( array_map( 'trim', explode( ',', $order ) ) );
+		$items = array_values( array_unique( $items ) );
+		return $items;
+	}
+
+	private function sanitize_section_order( $value ) {
+		$allowed = $this->get_section_keys();
+		$items = array();
+		if ( is_string( $value ) ) {
+			$items = array_map( 'trim', explode( ',', $value ) );
+		} elseif ( is_array( $value ) ) {
+			$items = $value;
+		}
+		$items = array_filter( $items, function ( $item ) use ( $allowed ) {
+			return in_array( $item, $allowed, true );
+		} );
+		return implode( ',', $items );
+	}
+
+	private function sanitize_bottom_sections( $value ) {
+		$allowed = $this->get_section_keys();
+		$items = array();
+		if ( is_array( $value ) ) {
+			$items = $value;
+		} elseif ( is_string( $value ) ) {
+			$items = array_map( 'trim', explode( ',', $value ) );
+		}
+		$items = array_filter( $items, function ( $item ) use ( $allowed ) {
+			return in_array( $item, $allowed, true );
+		} );
+		return array_values( array_unique( $items ) );
 	}
 
 	private function sanitize_items( $items, $allow_icon ) {
@@ -1229,6 +1327,32 @@ class Interslide_Vertical_Menu_Plugin {
 		<?php
 	}
 
+	public function render_bottom_sections_field() {
+		$settings = $this->get_settings();
+		$selected = $settings['bottom_sections'] ?? array();
+		$labels = $this->get_section_labels();
+		?>
+		<fieldset>
+			<?php foreach ( $labels as $key => $label ) : ?>
+				<?php if ( 'divider' === $key ) : ?>
+					<?php continue; ?>
+				<?php endif; ?>
+				<?php $id = 'ivm_bottom_section_' . $key; ?>
+				<label for="<?php echo esc_attr( $id ); ?>" style="display:block;margin-bottom:6px;">
+					<input
+						type="checkbox"
+						id="<?php echo esc_attr( $id ); ?>"
+						name="<?php echo esc_attr( $this->option_name . '[bottom_sections][]' ); ?>"
+						value="<?php echo esc_attr( $key ); ?>"
+						<?php checked( in_array( $key, $selected, true ) ); ?>
+					/>
+					<?php echo esc_html( $label ); ?>
+				</label>
+			<?php endforeach; ?>
+		</fieldset>
+		<?php
+	}
+
 	public function render_items_field( $args ) {
 		$settings = $this->get_settings();
 		$key = $args['option_key'];
@@ -1382,6 +1506,208 @@ class Interslide_Vertical_Menu_Plugin {
 		return $icons[ $key ] ?? '';
 	}
 
+	private function render_section_group( $section_order, $section_markup, $bottom_sections, $is_bottom ) {
+		$output = '';
+		$sections = array();
+		foreach ( $section_order as $section ) {
+			$in_bottom = in_array( $section, $bottom_sections, true );
+			if ( $is_bottom === $in_bottom ) {
+				$sections[] = $section;
+			}
+		}
+
+		$rendered_any = false;
+		$total = count( $sections );
+		foreach ( $sections as $index => $section ) {
+			$markup = $section_markup[ $section ] ?? '';
+			if ( 'divider' === $section ) {
+				if ( ! $rendered_any ) {
+					continue;
+				}
+				$has_next = false;
+				for ( $next = $index + 1; $next < $total; $next++ ) {
+					$next_section = $sections[ $next ];
+					$next_markup = $section_markup[ $next_section ] ?? '';
+					if ( 'divider' !== $next_section && '' !== $next_markup ) {
+						$has_next = true;
+						break;
+					}
+				}
+				if ( ! $has_next ) {
+					continue;
+				}
+				$output .= $markup;
+				continue;
+			}
+			if ( '' === $markup ) {
+				continue;
+			}
+			$rendered_any = true;
+			$output .= $markup;
+		}
+		return $output;
+	}
+
+	private function render_section_markup( $settings, $section ) {
+		switch ( $section ) {
+			case 'utility':
+				if ( empty( $settings['utility_links'] ) ) {
+					return '';
+				}
+				return $this->render_links_list( $settings['utility_links'], 'ivm__utility' );
+			case 'meta':
+				if ( ! $settings['breaking_enabled'] && ! $settings['live_enabled'] && ! $settings['date_enabled'] ) {
+					return '';
+				}
+				ob_start();
+				?>
+				<div class="ivm__meta">
+					<?php if ( $settings['breaking_enabled'] && $settings['breaking_text'] ) : ?>
+						<a class="ivm__breaking" href="<?php echo esc_url( $settings['breaking_url'] ); ?>">
+							<span class="ivm__badge"><?php echo esc_html__( 'Breaking', 'interslide-vertical-menu' ); ?></span>
+							<span class="ivm__breaking-text"><?php echo esc_html( $settings['breaking_text'] ); ?></span>
+						</a>
+					<?php endif; ?>
+					<?php if ( $settings['live_enabled'] && $settings['live_text'] ) : ?>
+						<a class="ivm__live" href="<?php echo esc_url( $settings['live_url'] ); ?>">
+							<span class="ivm__live-dot"></span>
+							<span class="ivm__live-text"><?php echo esc_html( $settings['live_text'] ); ?></span>
+						</a>
+					<?php endif; ?>
+					<?php if ( $settings['date_enabled'] ) : ?>
+						<span class="ivm__date"><?php echo esc_html( date_i18n( get_option( 'date_format' ) ) ); ?></span>
+					<?php endif; ?>
+				</div>
+				<?php
+				return ob_get_clean();
+			case 'primary':
+				ob_start();
+				?>
+				<div class="ivm__section">
+					<?php echo $this->render_menu_section( $settings, 'primary', $settings['primary_items'] ); ?>
+					<?php if ( $settings['mobile_menu_id'] ) : ?>
+						<div class="ivm__mobile-only">
+							<?php echo $this->render_menu_section( $settings, 'mobile', $settings['primary_items'] ); ?>
+						</div>
+					<?php endif; ?>
+				</div>
+				<?php
+				return ob_get_clean();
+			case 'trending':
+				if ( empty( $settings['trending_topics'] ) ) {
+					return '';
+				}
+				ob_start();
+				?>
+				<div class="ivm__trending">
+					<span class="ivm__trending-label"><?php echo esc_html__( 'Trending', 'interslide-vertical-menu' ); ?></span>
+					<div class="ivm__trending-items">
+						<?php foreach ( $settings['trending_topics'] as $item ) : ?>
+							<a class="ivm__chip" href="<?php echo esc_url( $item['url'] ); ?>"><?php echo esc_html( $item['label'] ); ?></a>
+						<?php endforeach; ?>
+					</div>
+				</div>
+				<?php
+				return ob_get_clean();
+			case 'divider':
+				return '<hr class="ivm__divider" />';
+			case 'secondary':
+				ob_start();
+				?>
+				<div class="ivm__section">
+					<?php echo $this->render_menu_section( $settings, 'secondary', $settings['secondary_items'] ); ?>
+				</div>
+				<?php
+				return ob_get_clean();
+			case 'search':
+				if ( 'link' === $settings['search_mode'] && $settings['search_url'] ) {
+					ob_start();
+					?>
+					<ul class="ivm__list">
+						<li>
+							<a href="<?php echo esc_url( $settings['search_url'] ); ?>" class="ivm__link">
+								<span class="ivm__icon" aria-hidden="true"><?php echo $this->get_icon_svg( 'search' ); ?></span>
+								<span class="ivm__label"><?php echo esc_html__( 'Search', 'interslide-vertical-menu' ); ?></span>
+							</a>
+						</li>
+					</ul>
+					<?php
+					return ob_get_clean();
+				}
+				if ( 'inline' === $settings['search_mode'] ) {
+					ob_start();
+					?>
+					<ul class="ivm__list">
+						<li class="ivm__search">
+							<form role="search" method="get" action="<?php echo esc_url( home_url( '/' ) ); ?>">
+								<label class="screen-reader-text" for="ivm-search-input"><?php echo esc_html__( 'Search', 'interslide-vertical-menu' ); ?></label>
+								<input id="ivm-search-input" type="search" name="s" placeholder="<?php echo esc_attr__( 'Search…', 'interslide-vertical-menu' ); ?>" />
+							</form>
+						</li>
+					</ul>
+					<?php
+					return ob_get_clean();
+				}
+				return '';
+			case 'bottom':
+				ob_start();
+				?>
+				<div class="ivm__section">
+					<?php echo $this->render_menu_section( $settings, 'bottom', $settings['bottom_items'] ); ?>
+				</div>
+				<?php
+				return ob_get_clean();
+			case 'newsletter':
+				if ( ! $settings['newsletter_enabled'] || ! $settings['newsletter_text'] ) {
+					return '';
+				}
+				ob_start();
+				?>
+				<div class="ivm__newsletter">
+					<a class="ivm__newsletter-link" href="<?php echo esc_url( $settings['newsletter_url'] ); ?>">
+						<?php echo esc_html( $settings['newsletter_text'] ); ?>
+					</a>
+				</div>
+				<?php
+				return ob_get_clean();
+			case 'account':
+				if ( ! $settings['account_enabled'] || ! $settings['account_text'] ) {
+					return '';
+				}
+				return sprintf(
+					'<a class="ivm__account" href="%s">%s</a>',
+					esc_url( $settings['account_url'] ),
+					esc_html( $settings['account_text'] )
+				);
+			case 'edition':
+				if ( ! $settings['edition_enabled'] || empty( $settings['edition_options'] ) ) {
+					return '';
+				}
+				ob_start();
+				?>
+				<div class="ivm__edition">
+					<label for="ivm-edition-select" class="ivm__edition-label"><?php echo esc_html__( 'Édition', 'interslide-vertical-menu' ); ?></label>
+					<select id="ivm-edition-select" class="ivm__edition-select">
+						<?php foreach ( $settings['edition_options'] as $index => $option ) : ?>
+							<option value="<?php echo esc_url( $option['url'] ); ?>" <?php selected( $settings['edition_default'], $index ); ?>><?php echo esc_html( $option['label'] ); ?></option>
+						<?php endforeach; ?>
+					</select>
+				</div>
+				<?php
+				return ob_get_clean();
+			case 'footer':
+				if ( ! $settings['footer_text'] ) {
+					return '';
+				}
+				return sprintf(
+					'<div class="ivm__footer">%s</div>',
+					wp_kses_post( $settings['footer_text'] )
+				);
+			default:
+				return '';
+		}
+	}
+
 	private function get_menu_markup( $settings, $atts ) {
 		$mode = isset( $atts['mode'] ) ? $atts['mode'] : 'fixed';
 		$mode = ( 'drawer' === $mode ) ? 'drawer' : 'fixed';
@@ -1413,6 +1739,13 @@ class Interslide_Vertical_Menu_Plugin {
 			esc_attr( $settings['toggle_color'] )
 		);
 
+		$section_order = $this->get_section_order( $settings );
+		$bottom_sections = $settings['bottom_sections'] ?? array();
+		$section_markup = array();
+		foreach ( $section_order as $section ) {
+			$section_markup[ $section ] = $this->render_section_markup( $settings, $section );
+		}
+
 		ob_start();
 		?>
 		<nav class="<?php echo esc_attr( $wrapper_classes ); ?>" style="<?php echo esc_attr( $inline_style ); ?>" aria-label="<?php echo esc_attr__( 'Interslide menu', 'interslide-vertical-menu' ); ?>">
@@ -1437,99 +1770,14 @@ class Interslide_Vertical_Menu_Plugin {
 						</a>
 					<?php endif; ?>
 				</div>
-				<?php if ( ! empty( $settings['utility_links'] ) ) : ?>
-					<?php echo $this->render_links_list( $settings['utility_links'], 'ivm__utility' ); ?>
-				<?php endif; ?>
-				<?php if ( $settings['breaking_enabled'] || $settings['live_enabled'] || $settings['date_enabled'] ) : ?>
-					<div class="ivm__meta">
-						<?php if ( $settings['breaking_enabled'] && $settings['breaking_text'] ) : ?>
-							<a class="ivm__breaking" href="<?php echo esc_url( $settings['breaking_url'] ); ?>">
-								<span class="ivm__badge"><?php echo esc_html__( 'Breaking', 'interslide-vertical-menu' ); ?></span>
-								<span class="ivm__breaking-text"><?php echo esc_html( $settings['breaking_text'] ); ?></span>
-							</a>
-						<?php endif; ?>
-						<?php if ( $settings['live_enabled'] && $settings['live_text'] ) : ?>
-							<a class="ivm__live" href="<?php echo esc_url( $settings['live_url'] ); ?>">
-								<span class="ivm__live-dot"></span>
-								<span class="ivm__live-text"><?php echo esc_html( $settings['live_text'] ); ?></span>
-							</a>
-						<?php endif; ?>
-						<?php if ( $settings['date_enabled'] ) : ?>
-							<span class="ivm__date"><?php echo esc_html( date_i18n( get_option( 'date_format' ) ) ); ?></span>
-						<?php endif; ?>
+				<div class="ivm__content">
+					<div class="ivm__content-main">
+						<?php echo $this->render_section_group( $section_order, $section_markup, $bottom_sections, false ); ?>
 					</div>
-				<?php endif; ?>
-				<div class="ivm__section">
-					<?php echo $this->render_menu_section( $settings, 'primary', $settings['primary_items'] ); ?>
-					<?php if ( $settings['mobile_menu_id'] ) : ?>
-						<div class="ivm__mobile-only">
-							<?php echo $this->render_menu_section( $settings, 'mobile', $settings['primary_items'] ); ?>
-						</div>
-					<?php endif; ?>
-				</div>
-				<?php if ( ! empty( $settings['trending_topics'] ) ) : ?>
-					<div class="ivm__trending">
-						<span class="ivm__trending-label"><?php echo esc_html__( 'Trending', 'interslide-vertical-menu' ); ?></span>
-						<div class="ivm__trending-items">
-							<?php foreach ( $settings['trending_topics'] as $item ) : ?>
-								<a class="ivm__chip" href="<?php echo esc_url( $item['url'] ); ?>"><?php echo esc_html( $item['label'] ); ?></a>
-							<?php endforeach; ?>
-						</div>
+					<div class="ivm__content-bottom">
+						<?php echo $this->render_section_group( $section_order, $section_markup, $bottom_sections, true ); ?>
 					</div>
-				<?php endif; ?>
-				<hr class="ivm__divider" />
-				<div class="ivm__section">
-					<?php echo $this->render_menu_section( $settings, 'secondary', $settings['secondary_items'] ); ?>
-					<?php if ( 'link' === $settings['search_mode'] && $settings['search_url'] ) : ?>
-						<ul class="ivm__list">
-							<li>
-								<a href="<?php echo esc_url( $settings['search_url'] ); ?>" class="ivm__link">
-									<span class="ivm__icon" aria-hidden="true"><?php echo $this->get_icon_svg( 'search' ); ?></span>
-									<span class="ivm__label"><?php echo esc_html__( 'Search', 'interslide-vertical-menu' ); ?></span>
-								</a>
-							</li>
-						</ul>
-					<?php endif; ?>
-					<?php if ( 'inline' === $settings['search_mode'] ) : ?>
-						<ul class="ivm__list">
-							<li class="ivm__search">
-								<form role="search" method="get" action="<?php echo esc_url( home_url( '/' ) ); ?>">
-									<label class="screen-reader-text" for="ivm-search-input"><?php echo esc_html__( 'Search', 'interslide-vertical-menu' ); ?></label>
-									<input id="ivm-search-input" type="search" name="s" placeholder="<?php echo esc_attr__( 'Search…', 'interslide-vertical-menu' ); ?>" />
-								</form>
-							</li>
-						</ul>
-					<?php endif; ?>
 				</div>
-				<hr class="ivm__divider" />
-				<div class="ivm__section">
-					<?php echo $this->render_menu_section( $settings, 'bottom', $settings['bottom_items'] ); ?>
-					<?php if ( $settings['newsletter_enabled'] && $settings['newsletter_text'] ) : ?>
-						<div class="ivm__newsletter">
-							<a class="ivm__newsletter-link" href="<?php echo esc_url( $settings['newsletter_url'] ); ?>">
-								<?php echo esc_html( $settings['newsletter_text'] ); ?>
-							</a>
-						</div>
-					<?php endif; ?>
-					<?php if ( $settings['account_enabled'] && $settings['account_text'] ) : ?>
-						<a class="ivm__account" href="<?php echo esc_url( $settings['account_url'] ); ?>">
-							<?php echo esc_html( $settings['account_text'] ); ?>
-						</a>
-					<?php endif; ?>
-				</div>
-				<?php if ( $settings['edition_enabled'] && ! empty( $settings['edition_options'] ) ) : ?>
-					<div class="ivm__edition">
-						<label for="ivm-edition-select" class="ivm__edition-label"><?php echo esc_html__( 'Édition', 'interslide-vertical-menu' ); ?></label>
-						<select id="ivm-edition-select" class="ivm__edition-select">
-							<?php foreach ( $settings['edition_options'] as $index => $option ) : ?>
-								<option value="<?php echo esc_url( $option['url'] ); ?>" <?php selected( $settings['edition_default'], $index ); ?>><?php echo esc_html( $option['label'] ); ?></option>
-							<?php endforeach; ?>
-						</select>
-					</div>
-				<?php endif; ?>
-				<?php if ( $settings['footer_text'] ) : ?>
-					<div class="ivm__footer"><?php echo wp_kses_post( $settings['footer_text'] ); ?></div>
-				<?php endif; ?>
 			</div>
 		</nav>
 		<?php
