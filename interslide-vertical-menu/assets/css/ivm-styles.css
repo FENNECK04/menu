@@ -398,7 +398,15 @@
 	content: '🇲🇦';
 }
 
+.ivm__link.ivm-emoji-maroc::before {
+	content: '🇲🇦';
+}
+
 .ivm__link.ivm-emoji-globe::before {
+	content: '🌍';
+}
+
+.ivm__link.ivm-emoji-international::before {
 	content: '🌍';
 }
 
@@ -406,8 +414,20 @@
 	content: '🌿';
 }
 
+.ivm__link.ivm-emoji-planet::before {
+	content: '🌿';
+}
+
 .ivm__link.ivm-emoji-robot::before {
 	content: '🤖';
+}
+
+.ivm__link.ivm-emoji-tech::before {
+	content: '💻';
+}
+
+.ivm__link.ivm-emoji-science::before {
+	content: '🔬';
 }
 
 .ivm__link.ivm-emoji-ticket::before {
@@ -422,6 +442,14 @@
 	content: '💶';
 }
 
+.ivm__link.ivm-emoji-society::before {
+	content: '👥';
+}
+
+.ivm__link.ivm-emoji-politics::before {
+	content: '🏛️';
+}
+
 .ivm__link.ivm-emoji-sport::before {
 	content: '🏅';
 }
@@ -430,12 +458,32 @@
 	content: '📰';
 }
 
+.ivm__link.ivm-emoji-media::before {
+	content: '📰';
+}
+
+.ivm__link.ivm-emoji-culture::before {
+	content: '🎭';
+}
+
 .ivm__link.ivm-emoji-doc::before {
 	content: '📄';
 }
 
 .ivm__link.ivm-emoji-podcast::before {
 	content: '🎙️';
+}
+
+.ivm__link.ivm-emoji-ideas::before {
+	content: '💡';
+}
+
+.ivm__link.ivm-emoji-studio::before {
+	content: '🎬';
+}
+
+.ivm__link.ivm-emoji-video::before {
+	content: '🎥';
 }
 
 .ivm__link.ivm-emoji-search::before {

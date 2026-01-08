@@ -993,6 +993,21 @@ class Interslide_Vertical_Menu_Plugin {
 		);
 
 		add_settings_section(
+			'ivm_emoji_reference',
+			__( 'Emoji Reference', 'interslide-vertical-menu' ),
+			'__return_false',
+			'interslide-vertical-menu'
+		);
+
+		add_settings_field(
+			'emoji_reference',
+			__( 'Emoji cheatsheet', 'interslide-vertical-menu' ),
+			array( $this, 'render_emoji_reference_field' ),
+			'interslide-vertical-menu',
+			'ivm_emoji_reference'
+		);
+
+		add_settings_section(
 			'ivm_cleanup',
 			__( 'Cleanup', 'interslide-vertical-menu' ),
 			'__return_false',
@@ -1503,6 +1518,54 @@ class Interslide_Vertical_Menu_Plugin {
 			<button type="button" class="button ivm-section-order__add-divider"><?php echo esc_html__( 'Add divider', 'interslide-vertical-menu' ); ?></button>
 			<p class="description"><?php echo esc_html__( 'Toggle sections to show/hide them, then use the arrows to reorder.', 'interslide-vertical-menu' ); ?></p>
 		</div>
+		<?php
+	}
+
+	public function render_emoji_reference_field() {
+		$emoji_map = array(
+			'ivm-emoji-maroc'        => '🇲🇦',
+			'ivm-emoji-international' => '🌍',
+			'ivm-emoji-economy'      => '💶',
+			'ivm-emoji-society'      => '👥',
+			'ivm-emoji-politics'     => '🏛️',
+			'ivm-emoji-sport'        => '🏅',
+			'ivm-emoji-culture'      => '🎭',
+			'ivm-emoji-media'        => '📰',
+			'ivm-emoji-planet'       => '🌿',
+			'ivm-emoji-science'      => '🔬',
+			'ivm-emoji-tech'         => '💻',
+			'ivm-emoji-ideas'        => '💡',
+			'ivm-emoji-studio'       => '🎬',
+			'ivm-emoji-video'        => '🎥',
+			'ivm-emoji-flag'         => '🇲🇦',
+			'ivm-emoji-globe'        => '🌍',
+			'ivm-emoji-leaf'         => '🌿',
+			'ivm-emoji-robot'        => '🤖',
+			'ivm-emoji-ticket'       => '🎟️',
+			'ivm-emoji-health'       => '🩺',
+			'ivm-emoji-article'      => '📰',
+			'ivm-emoji-doc'          => '📄',
+			'ivm-emoji-podcast'      => '🎙️',
+			'ivm-emoji-search'       => '🔍',
+		);
+		?>
+		<p><?php echo esc_html__( 'Add one of these CSS classes to a menu item (Appearance → Menus → CSS Classes) to display an emoji instead of the SVG icon.', 'interslide-vertical-menu' ); ?></p>
+		<table class="widefat striped" style="max-width:520px;">
+			<thead>
+				<tr>
+					<th><?php echo esc_html__( 'Emoji', 'interslide-vertical-menu' ); ?></th>
+					<th><?php echo esc_html__( 'CSS class', 'interslide-vertical-menu' ); ?></th>
+				</tr>
+			</thead>
+			<tbody>
+				<?php foreach ( $emoji_map as $class => $emoji ) : ?>
+					<tr>
+						<td style="font-size:18px;"><?php echo esc_html( $emoji ); ?></td>
+						<td><code><?php echo esc_html( $class ); ?></code></td>
+					</tr>
+				<?php endforeach; ?>
+			</tbody>
+		</table>
 		<?php
 	}
 
