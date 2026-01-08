@@ -1,0 +1,284 @@
+.ivm {
+	--ivm-width: 280px;
+	--ivm-bg: #ffffff;
+	--ivm-text: #111111;
+	--ivm-hover: #f2f2f2;
+	--ivm-pill: #2f6feb;
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+	color: var(--ivm-text);
+	z-index: 9999;
+}
+
+.ivm *,
+.ivm *::before,
+.ivm *::after {
+	box-sizing: border-box;
+}
+
+.ivm__panel {
+	background: var(--ivm-bg);
+	width: var(--ivm-width);
+	height: 100vh;
+	position: fixed;
+	left: 0;
+	top: 0;
+	overflow-y: auto;
+	overflow-x: hidden;
+	padding: 24px 20px;
+	box-shadow: 0 0 0 rgba(0, 0, 0, 0);
+	z-index: 10000;
+}
+
+.ivm__logo {
+	text-decoration: none;
+	color: inherit;
+	font-weight: 700;
+	font-size: 20px;
+	display: inline-flex;
+	align-items: center;
+	gap: 10px;
+}
+
+.ivm__logo-image {
+	max-width: 180px;
+	height: auto;
+}
+
+.ivm__pill {
+	display: inline-block;
+	margin-top: 12px;
+	padding: 6px 12px;
+	border-radius: 999px;
+	background: var(--ivm-pill);
+	color: #ffffff;
+	text-decoration: none;
+	font-size: 12px;
+	box-shadow: 0 3px 6px rgba(0, 0, 0, 0.12);
+}
+
+.ivm__header {
+	margin-bottom: 20px;
+	padding-top: 16px;
+}
+
+.ivm__section {
+	margin-bottom: 16px;
+}
+
+.ivm__list {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+.ivm__list li {
+	margin-bottom: 6px;
+}
+
+.ivm__list .sub-menu {
+	list-style: none;
+	margin: 6px 0 0 18px;
+	padding: 0;
+}
+
+.ivm__list .sub-menu .ivm__link {
+	font-size: 13px;
+}
+
+.ivm__link {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 6px 8px;
+	border-radius: 8px;
+	text-decoration: none;
+	color: inherit;
+	font-size: 14px;
+	transition: background 0.2s ease;
+}
+
+.ivm__link:hover,
+.ivm__link:focus {
+	background: var(--ivm-hover);
+	outline: none;
+}
+
+.ivm__icon svg {
+	width: 16px;
+	height: 16px;
+	fill: currentColor;
+}
+
+.ivm__divider {
+	border: none;
+	border-top: 1px solid #e5e5e5;
+	margin: 16px 0;
+}
+
+.ivm__edition {
+	margin-top: 20px;
+}
+
+.ivm__edition-label {
+	display: block;
+	font-size: 12px;
+	margin-bottom: 6px;
+}
+
+.ivm__edition-select {
+	width: 100%;
+	padding: 6px 8px;
+	border-radius: 6px;
+	border: 1px solid #dcdcdc;
+	background: #fff;
+}
+
+.ivm__toggle {
+	display: inline-flex;
+	position: static;
+	width: 40px;
+	height: 40px;
+	border: 1px solid #e0e0e0;
+	background: #fff;
+	border-radius: 8px;
+	align-items: center;
+	justify-content: center;
+	gap: 4px;
+	z-index: 10000;
+	cursor: pointer;
+}
+
+.ivm__toggle-bar {
+	display: block;
+	width: 18px;
+	height: 2px;
+	background: #111;
+}
+
+.ivm__overlay {
+	position: fixed;
+	inset: 0;
+	background: rgba(0, 0, 0, 0.4);
+	z-index: 9999;
+}
+
+.ivm__meta {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	margin-bottom: 20px;
+}
+
+.ivm__breaking {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	text-decoration: none;
+	color: inherit;
+	font-size: 13px;
+}
+
+.ivm__badge {
+	background: #e10600;
+	color: #fff;
+	font-size: 10px;
+	text-transform: uppercase;
+	letter-spacing: 0.08em;
+	padding: 3px 6px;
+	border-radius: 4px;
+}
+
+.ivm__breaking-text {
+	font-weight: 600;
+}
+
+.ivm__live {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	text-decoration: none;
+	color: inherit;
+	font-size: 12px;
+}
+
+.ivm__live-dot {
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	background: #e10600;
+	display: inline-block;
+}
+
+.ivm__date {
+	font-size: 12px;
+	color: #555;
+}
+
+.ivm__newsletter {
+	margin-top: 12px;
+}
+
+.ivm__newsletter-link {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	padding: 8px 12px;
+	border-radius: 999px;
+	background: #111;
+	color: #fff;
+	text-decoration: none;
+	font-size: 12px;
+}
+
+.ivm__mobile-header {
+	display: none;
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	height: 56px;
+	align-items: center;
+	gap: 12px;
+	padding: 0 16px;
+	background: #111111;
+	color: #ffffff;
+	z-index: 10001;
+}
+
+.ivm__mobile-logo {
+	color: inherit;
+	text-decoration: none;
+	font-weight: 700;
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.ivm__mobile-logo .ivm__logo-text {
+	color: inherit;
+}
+
+.ivm__mobile-header .ivm__logo-image {
+	max-height: 28px;
+	width: auto;
+}
+
+.ivm__mobile-header .ivm__toggle {
+	background: transparent;
+	border-color: #2a2a2a;
+}
+
+.ivm__mobile-header .ivm__toggle-bar {
+	background: #ffffff;
+}
+
+.ivm__search input {
+	width: 100%;
+	padding: 6px 8px;
+	border-radius: 6px;
+	border: 1px solid #dcdcdc;
+}
+
+.ivm-body {
+	margin-left: var(--ivm-width);
+}
