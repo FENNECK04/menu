@@ -85,10 +85,14 @@ class Interslide_Vertical_Menu_Plugin {
 			'newsletter_url'     => home_url( '/' ),
 			'utility_links'      => $this->get_default_utility_links(),
 			'trending_topics'    => $this->get_default_trending_topics(),
+			'trending_label'     => __( 'Trending', 'interslide-vertical-menu' ),
 			'account_enabled'    => 0,
 			'account_text'       => __( 'Sign in', 'interslide-vertical-menu' ),
 			'account_url'        => wp_login_url(),
 			'footer_text'        => '',
+			'breaking_badge_label' => __( 'Breaking', 'interslide-vertical-menu' ),
+			'search_label'       => __( 'Search', 'interslide-vertical-menu' ),
+			'edition_label'      => __( 'Édition', 'interslide-vertical-menu' ),
 			'section_order'      => 'utility,meta,primary,trending,divider,secondary,search,divider,bottom,newsletter,account,edition,footer',
 			'bottom_sections'    => array( 'newsletter', 'account', 'edition', 'footer' ),
 			'mobile_menu_id'     => 0,
@@ -98,6 +102,7 @@ class Interslide_Vertical_Menu_Plugin {
 			'bottom_menu_id'     => 0,
 			'hide_theme_menu'    => 0,
 			'hide_selectors'     => '.site-header, .main-navigation, nav[aria-label="Primary"], nav.wp-block-navigation',
+			'custom_css'         => '',
 			'cleanup_on_uninstall' => 0,
 		);
 	}
@@ -289,7 +294,7 @@ class Interslide_Vertical_Menu_Plugin {
 		add_settings_field(
 			'section_order',
 			__( 'Section order', 'interslide-vertical-menu' ),
-			array( $this, 'render_text_field' ),
+			array( $this, 'render_section_order_field' ),
 			'interslide-vertical-menu',
 			'ivm_menu_items',
 			array(
@@ -327,6 +332,18 @@ class Interslide_Vertical_Menu_Plugin {
 			array(
 				'option_key' => 'trending_topics',
 				'label'      => __( 'Label|URL (one per line).', 'interslide-vertical-menu' ),
+			)
+		);
+
+		add_settings_field(
+			'trending_label',
+			__( 'Trending label', 'interslide-vertical-menu' ),
+			array( $this, 'render_text_field' ),
+			'interslide-vertical-menu',
+			'ivm_menu_items',
+			array(
+				'label_for'  => 'ivm_trending_label',
+				'option_key' => 'trending_label',
 			)
 		);
 
@@ -450,6 +467,18 @@ class Interslide_Vertical_Menu_Plugin {
 			array(
 				'label_for'  => 'ivm_breaking_text',
 				'option_key' => 'breaking_text',
+			)
+		);
+
+		add_settings_field(
+			'breaking_badge_label',
+			__( 'Breaking badge label', 'interslide-vertical-menu' ),
+			array( $this, 'render_text_field' ),
+			'interslide-vertical-menu',
+			'ivm_features',
+			array(
+				'label_for'  => 'ivm_breaking_badge_label',
+				'option_key' => 'breaking_badge_label',
 			)
 		);
 
@@ -831,6 +860,18 @@ class Interslide_Vertical_Menu_Plugin {
 		);
 
 		add_settings_field(
+			'search_label',
+			__( 'Search label', 'interslide-vertical-menu' ),
+			array( $this, 'render_text_field' ),
+			'interslide-vertical-menu',
+			'ivm_search',
+			array(
+				'label_for'  => 'ivm_search_label',
+				'option_key' => 'search_label',
+			)
+		);
+
+		add_settings_field(
 			'search_url',
 			__( 'Search URL', 'interslide-vertical-menu' ),
 			array( $this, 'render_text_field' ),
@@ -887,6 +928,18 @@ class Interslide_Vertical_Menu_Plugin {
 			)
 		);
 
+		add_settings_field(
+			'edition_label',
+			__( 'Edition label', 'interslide-vertical-menu' ),
+			array( $this, 'render_text_field' ),
+			'interslide-vertical-menu',
+			'ivm_edition',
+			array(
+				'label_for'  => 'ivm_edition_label',
+				'option_key' => 'edition_label',
+			)
+		);
+
 		add_settings_section(
 			'ivm_layout',
 			__( 'Layout Integration', 'interslide-vertical-menu' ),
@@ -916,6 +969,26 @@ class Interslide_Vertical_Menu_Plugin {
 			array(
 				'label_for'  => 'ivm_hide_selectors',
 				'option_key' => 'hide_selectors',
+			)
+		);
+
+		add_settings_section(
+			'ivm_advanced',
+			__( 'Advanced', 'interslide-vertical-menu' ),
+			'__return_false',
+			'interslide-vertical-menu'
+		);
+
+		add_settings_field(
+			'custom_css',
+			__( 'Custom CSS', 'interslide-vertical-menu' ),
+			array( $this, 'render_textarea_field' ),
+			'interslide-vertical-menu',
+			'ivm_advanced',
+			array(
+				'label_for'  => 'ivm_custom_css',
+				'option_key' => 'custom_css',
+				'rows'       => 6,
 			)
 		);
 
@@ -989,10 +1062,14 @@ class Interslide_Vertical_Menu_Plugin {
 		$output['newsletter_url']       = esc_url_raw( $input['newsletter_url'] ?? $defaults['newsletter_url'] );
 		$output['utility_links']        = $this->sanitize_items( $input['utility_links'] ?? array(), false );
 		$output['trending_topics']      = $this->sanitize_items( $input['trending_topics'] ?? array(), false );
+		$output['trending_label']       = sanitize_text_field( $input['trending_label'] ?? $defaults['trending_label'] );
 		$output['account_enabled']      = isset( $input['account_enabled'] ) ? 1 : 0;
 		$output['account_text']         = sanitize_text_field( $input['account_text'] ?? $defaults['account_text'] );
 		$output['account_url']          = esc_url_raw( $input['account_url'] ?? $defaults['account_url'] );
 		$output['footer_text']          = wp_kses_post( $input['footer_text'] ?? $defaults['footer_text'] );
+		$output['breaking_badge_label'] = sanitize_text_field( $input['breaking_badge_label'] ?? $defaults['breaking_badge_label'] );
+		$output['search_label']         = sanitize_text_field( $input['search_label'] ?? $defaults['search_label'] );
+		$output['edition_label']        = sanitize_text_field( $input['edition_label'] ?? $defaults['edition_label'] );
 		$output['section_order']        = $this->sanitize_section_order( $input['section_order'] ?? $defaults['section_order'] );
 		$output['bottom_sections']      = $this->sanitize_bottom_sections( $input['bottom_sections'] ?? $defaults['bottom_sections'] );
 		$output['mobile_menu_id']       = absint( $input['mobile_menu_id'] ?? 0 );
@@ -1002,6 +1079,7 @@ class Interslide_Vertical_Menu_Plugin {
 		$output['bottom_menu_id']       = absint( $input['bottom_menu_id'] ?? 0 );
 		$output['hide_theme_menu']      = isset( $input['hide_theme_menu'] ) ? 1 : 0;
 		$output['hide_selectors']       = $this->sanitize_selectors( $input['hide_selectors'] ?? $defaults['hide_selectors'] );
+		$output['custom_css']           = sanitize_textarea_field( $input['custom_css'] ?? $defaults['custom_css'] );
 		$output['cleanup_on_uninstall'] = isset( $input['cleanup_on_uninstall'] ) ? 1 : 0;
 
 		return $output;
@@ -1066,16 +1144,32 @@ class Interslide_Vertical_Menu_Plugin {
 		);
 	}
 
-	private function get_section_order( $settings ) {
+	private function get_section_order_tokens( $settings ) {
 		$defaults = $this->get_default_settings();
 		$order = $settings['section_order'] ?? '';
 		$order = $this->sanitize_section_order( $order );
 		if ( '' === $order ) {
 			$order = $this->sanitize_section_order( $defaults['section_order'] );
 		}
-		$items = array_filter( array_map( 'trim', explode( ',', $order ) ) );
-		$items = array_values( array_unique( $items ) );
-		return $items;
+		return array_filter( array_map( 'trim', explode( ',', $order ) ) );
+	}
+
+	private function get_section_order( $settings ) {
+		$items = $this->get_section_order_tokens( $settings );
+		$filtered = array();
+		$seen = array();
+		foreach ( $items as $item ) {
+			if ( 'divider' === $item ) {
+				$filtered[] = $item;
+				continue;
+			}
+			if ( isset( $seen[ $item ] ) ) {
+				continue;
+			}
+			$seen[ $item ] = true;
+			$filtered[] = $item;
+		}
+		return $filtered;
 	}
 
 	private function sanitize_section_order( $value ) {
@@ -1101,7 +1195,7 @@ class Interslide_Vertical_Menu_Plugin {
 			$items = array_map( 'trim', explode( ',', $value ) );
 		}
 		$items = array_filter( $items, function ( $item ) use ( $allowed ) {
-			return in_array( $item, $allowed, true );
+			return 'divider' !== $item && in_array( $item, $allowed, true );
 		} );
 		return array_values( array_unique( $items ) );
 	}
@@ -1206,6 +1300,9 @@ class Interslide_Vertical_Menu_Plugin {
 		);
 		if ( $settings['hide_theme_menu'] && $settings['hide_selectors'] ) {
 			$inline_css .= sprintf( '%s{display:none !important;}', $settings['hide_selectors'] );
+		}
+		if ( ! empty( $settings['custom_css'] ) ) {
+			$inline_css .= "\n" . $settings['custom_css'];
 		}
 		wp_add_inline_style( 'ivm-styles', $inline_css );
 
@@ -1324,6 +1421,88 @@ class Interslide_Vertical_Menu_Plugin {
 		$id  = 'ivm_' . $key;
 		?>
 		<input type="text" id="<?php echo esc_attr( $id ); ?>" name="<?php echo esc_attr( $this->option_name . '[' . $key . ']' ); ?>" value="<?php echo esc_attr( $settings[ $key ] ); ?>" class="regular-text" />
+		<?php
+	}
+
+	public function render_textarea_field( $args ) {
+		$settings = $this->get_settings();
+		$key = $args['option_key'];
+		$id  = 'ivm_' . $key;
+		$rows = isset( $args['rows'] ) ? (int) $args['rows'] : 4;
+		?>
+		<textarea id="<?php echo esc_attr( $id ); ?>" name="<?php echo esc_attr( $this->option_name . '[' . $key . ']' ); ?>" rows="<?php echo esc_attr( $rows ); ?>" class="large-text code"><?php echo esc_textarea( $settings[ $key ] ); ?></textarea>
+		<?php
+	}
+
+	public function render_section_order_field() {
+		$settings = $this->get_settings();
+		$order_items = $this->get_section_order_tokens( $settings );
+		$labels = $this->get_section_labels();
+		$used = array();
+		$items = array();
+
+		foreach ( $order_items as $item ) {
+			if ( ! isset( $labels[ $item ] ) ) {
+				continue;
+			}
+			if ( 'divider' !== $item ) {
+				if ( isset( $used[ $item ] ) ) {
+					continue;
+				}
+				$used[ $item ] = true;
+			}
+			$items[] = array(
+				'key'     => $item,
+				'label'   => $labels[ $item ],
+				'checked' => true,
+			);
+		}
+
+		foreach ( $labels as $key => $label ) {
+			if ( 'divider' === $key || isset( $used[ $key ] ) ) {
+				continue;
+			}
+			$items[] = array(
+				'key'     => $key,
+				'label'   => $label,
+				'checked' => false,
+			);
+		}
+
+		$id = 'ivm_section_order';
+		?>
+		<div class="ivm-section-order" data-target="<?php echo esc_attr( $id ); ?>" data-divider-label="<?php echo esc_attr__( 'Divider', 'interslide-vertical-menu' ); ?>" data-remove-label="<?php echo esc_attr__( 'Remove', 'interslide-vertical-menu' ); ?>">
+			<style>
+				.ivm-section-order__list{margin:0;padding:0;list-style:none;max-width:520px;}
+				.ivm-section-order__item{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #e5e5e5;}
+				.ivm-section-order__handle{color:#888;}
+				.ivm-section-order__actions{margin-left:auto;display:inline-flex;gap:6px;}
+				.ivm-section-order__remove{margin-left:auto;}
+			</style>
+			<input type="hidden" id="<?php echo esc_attr( $id ); ?>" name="<?php echo esc_attr( $this->option_name . '[section_order]' ); ?>" value="<?php echo esc_attr( $settings['section_order'] ); ?>" />
+			<ul class="ivm-section-order__list">
+				<?php foreach ( $items as $item ) : ?>
+					<li class="ivm-section-order__item" data-key="<?php echo esc_attr( $item['key'] ); ?>">
+						<span class="ivm-section-order__handle" aria-hidden="true">⋮⋮</span>
+						<?php if ( 'divider' === $item['key'] ) : ?>
+							<span class="ivm-section-order__label"><?php echo esc_html( $item['label'] ); ?></span>
+							<button type="button" class="button-link ivm-section-order__remove"><?php echo esc_html__( 'Remove', 'interslide-vertical-menu' ); ?></button>
+						<?php else : ?>
+							<label>
+								<input type="checkbox" class="ivm-section-order__toggle" <?php checked( $item['checked'] ); ?> />
+								<span class="ivm-section-order__label"><?php echo esc_html( $item['label'] ); ?></span>
+							</label>
+						<?php endif; ?>
+						<span class="ivm-section-order__actions">
+							<button type="button" class="button-link ivm-section-order__up" aria-label="<?php echo esc_attr__( 'Move up', 'interslide-vertical-menu' ); ?>">↑</button>
+							<button type="button" class="button-link ivm-section-order__down" aria-label="<?php echo esc_attr__( 'Move down', 'interslide-vertical-menu' ); ?>">↓</button>
+						</span>
+					</li>
+				<?php endforeach; ?>
+			</ul>
+			<button type="button" class="button ivm-section-order__add-divider"><?php echo esc_html__( 'Add divider', 'interslide-vertical-menu' ); ?></button>
+			<p class="description"><?php echo esc_html__( 'Toggle sections to show/hide them, then use the arrows to reorder.', 'interslide-vertical-menu' ); ?></p>
+		</div>
 		<?php
 	}
 
@@ -1559,12 +1738,13 @@ class Interslide_Vertical_Menu_Plugin {
 				if ( ! $settings['breaking_enabled'] && ! $settings['live_enabled'] && ! $settings['date_enabled'] ) {
 					return '';
 				}
+				$breaking_badge_label = $settings['breaking_badge_label'] ? $settings['breaking_badge_label'] : __( 'Breaking', 'interslide-vertical-menu' );
 				ob_start();
 				?>
 				<div class="ivm__meta">
 					<?php if ( $settings['breaking_enabled'] && $settings['breaking_text'] ) : ?>
 						<a class="ivm__breaking" href="<?php echo esc_url( $settings['breaking_url'] ); ?>">
-							<span class="ivm__badge"><?php echo esc_html__( 'Breaking', 'interslide-vertical-menu' ); ?></span>
+							<span class="ivm__badge"><?php echo esc_html( $breaking_badge_label ); ?></span>
 							<span class="ivm__breaking-text"><?php echo esc_html( $settings['breaking_text'] ); ?></span>
 						</a>
 					<?php endif; ?>
@@ -1597,10 +1777,11 @@ class Interslide_Vertical_Menu_Plugin {
 				if ( empty( $settings['trending_topics'] ) ) {
 					return '';
 				}
+				$trending_label = $settings['trending_label'] ? $settings['trending_label'] : __( 'Trending', 'interslide-vertical-menu' );
 				ob_start();
 				?>
 				<div class="ivm__trending">
-					<span class="ivm__trending-label"><?php echo esc_html__( 'Trending', 'interslide-vertical-menu' ); ?></span>
+					<span class="ivm__trending-label"><?php echo esc_html( $trending_label ); ?></span>
 					<div class="ivm__trending-items">
 						<?php foreach ( $settings['trending_topics'] as $item ) : ?>
 							<a class="ivm__chip" href="<?php echo esc_url( $item['url'] ); ?>"><?php echo esc_html( $item['label'] ); ?></a>
@@ -1620,6 +1801,7 @@ class Interslide_Vertical_Menu_Plugin {
 				<?php
 				return ob_get_clean();
 			case 'search':
+				$search_label = $settings['search_label'] ? $settings['search_label'] : __( 'Search', 'interslide-vertical-menu' );
 				if ( 'link' === $settings['search_mode'] && $settings['search_url'] ) {
 					ob_start();
 					?>
@@ -1627,7 +1809,7 @@ class Interslide_Vertical_Menu_Plugin {
 						<li>
 							<a href="<?php echo esc_url( $settings['search_url'] ); ?>" class="ivm__link">
 								<span class="ivm__icon" aria-hidden="true"><?php echo $this->get_icon_svg( 'search' ); ?></span>
-								<span class="ivm__label"><?php echo esc_html__( 'Search', 'interslide-vertical-menu' ); ?></span>
+								<span class="ivm__label"><?php echo esc_html( $search_label ); ?></span>
 							</a>
 						</li>
 					</ul>
@@ -1640,8 +1822,8 @@ class Interslide_Vertical_Menu_Plugin {
 					<ul class="ivm__list">
 						<li class="ivm__search">
 							<form role="search" method="get" action="<?php echo esc_url( home_url( '/' ) ); ?>">
-								<label class="screen-reader-text" for="ivm-search-input"><?php echo esc_html__( 'Search', 'interslide-vertical-menu' ); ?></label>
-								<input id="ivm-search-input" type="search" name="s" placeholder="<?php echo esc_attr__( 'Search…', 'interslide-vertical-menu' ); ?>" />
+								<label class="screen-reader-text" for="ivm-search-input"><?php echo esc_html( $search_label ); ?></label>
+								<input id="ivm-search-input" type="search" name="s" placeholder="<?php echo esc_attr( $search_label . '…' ); ?>" />
 							</form>
 						</li>
 					</ul>
@@ -1683,10 +1865,11 @@ class Interslide_Vertical_Menu_Plugin {
 				if ( ! $settings['edition_enabled'] || empty( $settings['edition_options'] ) ) {
 					return '';
 				}
+				$edition_label = $settings['edition_label'] ? $settings['edition_label'] : __( 'Édition', 'interslide-vertical-menu' );
 				ob_start();
 				?>
 				<div class="ivm__edition">
-					<label for="ivm-edition-select" class="ivm__edition-label"><?php echo esc_html__( 'Édition', 'interslide-vertical-menu' ); ?></label>
+					<label for="ivm-edition-select" class="ivm__edition-label"><?php echo esc_html( $edition_label ); ?></label>
 					<select id="ivm-edition-select" class="ivm__edition-select">
 						<?php foreach ( $settings['edition_options'] as $index => $option ) : ?>
 							<option value="<?php echo esc_url( $option['url'] ); ?>" <?php selected( $settings['edition_default'], $index ); ?>><?php echo esc_html( $option['label'] ); ?></option>
