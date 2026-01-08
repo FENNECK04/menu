@@ -381,3 +381,63 @@
 .ivm-body {
 	margin-left: var(--ivm-width);
 }
+
+.ivm__link[class*="ivm-emoji-"]::before {
+	content: '';
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 18px;
+}
+
+.ivm__link[class*="ivm-emoji-"] .ivm__icon {
+	display: none;
+}
+
+.ivm__link.ivm-emoji-flag::before {
+	content: '🇲🇦';
+}
+
+.ivm__link.ivm-emoji-globe::before {
+	content: '🌍';
+}
+
+.ivm__link.ivm-emoji-leaf::before {
+	content: '🌿';
+}
+
+.ivm__link.ivm-emoji-robot::before {
+	content: '🤖';
+}
+
+.ivm__link.ivm-emoji-ticket::before {
+	content: '🎟️';
+}
+
+.ivm__link.ivm-emoji-health::before {
+	content: '🩺';
+}
+
+.ivm__link.ivm-emoji-economy::before {
+	content: '💶';
+}
+
+.ivm__link.ivm-emoji-sport::before {
+	content: '🏅';
+}
+
+.ivm__link.ivm-emoji-article::before {
+	content: '📰';
+}
+
+.ivm__link.ivm-emoji-doc::before {
+	content: '📄';
+}
+
+.ivm__link.ivm-emoji-podcast::before {
+	content: '🎙️';
+}
+
+.ivm__link.ivm-emoji-search::before {
+	content: '🔍';
+}

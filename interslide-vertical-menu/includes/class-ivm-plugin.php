@@ -1996,8 +1996,9 @@ class Interslide_Vertical_Menu_Plugin {
 		?>
 		<ul class="ivm__list">
 			<?php foreach ( $fallback_items as $item ) : ?>
+				<?php $emoji_class = ! empty( $item['icon'] ) ? ' ivm-emoji-' . esc_attr( $item['icon'] ) : ''; ?>
 				<li>
-					<a href="<?php echo esc_url( $item['url'] ); ?>" class="ivm__link">
+					<a href="<?php echo esc_url( $item['url'] ); ?>" class="ivm__link<?php echo esc_attr( $emoji_class ); ?>">
 						<?php if ( ! empty( $item['icon'] ) ) : ?>
 							<span class="ivm__icon" aria-hidden="true"><?php echo $this->get_icon_svg( $item['icon'] ); ?></span>
 						<?php endif; ?>
@@ -2032,8 +2033,15 @@ class Interslide_Vertical_Menu_Walker extends Walker_Nav_Menu {
 
 	public function start_el( &$output, $item, $depth = 0, $args = array(), $id = 0 ) {
 		$icon = '';
+		$link_classes = array( 'ivm__link' );
+		$item_classes = array();
 		if ( ! empty( $item->classes ) && is_array( $item->classes ) ) {
 			foreach ( $item->classes as $class ) {
+				$clean_class = sanitize_html_class( $class );
+				if ( '' !== $clean_class ) {
+					$item_classes[] = $clean_class;
+					$link_classes[] = $clean_class;
+				}
 				if ( 0 === strpos( $class, 'ivm-icon-' ) ) {
 					$icon_key = substr( $class, strlen( 'ivm-icon-' ) );
 					$icon = $this->plugin->get_icon_svg( sanitize_key( $icon_key ) );
@@ -2042,8 +2050,9 @@ class Interslide_Vertical_Menu_Walker extends Walker_Nav_Menu {
 			}
 		}
 
-		$output .= '<li>';
-		$output .= '<a class="ivm__link" href="' . esc_url( $item->url ) . '">';
+		$item_class_attr = ! empty( $item_classes ) ? ' class="' . esc_attr( implode( ' ', $item_classes ) ) . '"' : '';
+		$output .= '<li' . $item_class_attr . '>';
+		$output .= '<a class="' . esc_attr( implode( ' ', array_unique( $link_classes ) ) ) . '" href="' . esc_url( $item->url ) . '">';
 		if ( $icon ) {
 			$output .= '<span class="ivm__icon" aria-hidden="true">' . $icon . '</span>';
 		}
