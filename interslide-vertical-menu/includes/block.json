@@ -1,0 +1,17 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 2,
+  "name": "interslide/vertical-menu",
+  "title": "Interslide Menu",
+  "category": "widgets",
+  "icon": "menu",
+  "description": "Display the Interslide vertical menu.",
+  "textdomain": "interslide-vertical-menu",
+  "editorScript": "ivm-block",
+  "attributes": {
+    "mode": {
+      "type": "string",
+      "default": "fixed"
+    }
+  }
+}
