@@ -707,7 +707,7 @@ class Interslide_Vertical_Menu_Plugin {
 		);
 
 		$inline_css = sprintf(
-			':root{--ivm-width:%dpx;}@media (max-width:%dpx){.ivm__panel{transform:translateX(-100%%);transition:transform .25s ease;position:fixed;}.ivm--open .ivm__panel{transform:translateX(0);}.ivm__toggle{display:inline-flex;}.ivm-body{margin-left:0;}}',
+			':root{--ivm-width:%dpx;}@media (max-width:%dpx){.ivm__panel{transform:translateX(-100%%);transition:transform .25s ease;position:fixed;padding-top:80px;}.ivm--open .ivm__panel{transform:translateX(0);}.ivm__mobile-header{display:flex;}.ivm-body{margin-left:0;}}',
 			intval( $settings['sidebar_width'] ),
 			intval( $settings['mobile_breakpoint'] )
 		);
@@ -994,12 +994,17 @@ class Interslide_Vertical_Menu_Plugin {
 		ob_start();
 		?>
 		<nav class="<?php echo esc_attr( $wrapper_classes ); ?>" style="<?php echo esc_attr( $inline_style ); ?>" aria-label="<?php echo esc_attr__( 'Interslide menu', 'interslide-vertical-menu' ); ?>">
-			<button class="ivm__toggle" aria-expanded="false" aria-controls="<?php echo esc_attr( $panel_id ); ?>">
-				<span class="ivm__toggle-bar"></span>
-				<span class="ivm__toggle-bar"></span>
-				<span class="ivm__toggle-bar"></span>
-				<span class="screen-reader-text"><?php echo esc_html__( 'Open menu', 'interslide-vertical-menu' ); ?></span>
-			</button>
+			<div class="ivm__mobile-header">
+				<button class="ivm__toggle" aria-expanded="false" aria-controls="<?php echo esc_attr( $panel_id ); ?>">
+					<span class="ivm__toggle-bar"></span>
+					<span class="ivm__toggle-bar"></span>
+					<span class="ivm__toggle-bar"></span>
+					<span class="screen-reader-text"><?php echo esc_html__( 'Open menu', 'interslide-vertical-menu' ); ?></span>
+				</button>
+				<a class="ivm__mobile-logo" href="<?php echo esc_url( $settings['logo_link'] ); ?>">
+					<?php echo $logo; ?>
+				</a>
+			</div>
 			<div class="ivm__overlay" tabindex="-1" hidden></div>
 			<div class="ivm__panel" id="<?php echo esc_attr( $panel_id ); ?>" role="dialog" aria-modal="true" aria-hidden="<?php echo esc_attr( 'fixed' === $mode ? 'false' : 'true' ); ?>">
 				<div class="ivm__header">
