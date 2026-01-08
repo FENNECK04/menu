@@ -57,6 +57,8 @@ class Interslide_Vertical_Menu_Plugin {
 			'edition_enabled'    => 0,
 			'edition_options'    => $this->get_default_editions(),
 			'edition_default'    => 0,
+			'hide_theme_menu'    => 0,
+			'hide_selectors'     => '.site-header, .main-navigation, nav[aria-label="Primary"], nav.wp-block-navigation',
 			'cleanup_on_uninstall' => 0,
 		);
 	}
@@ -427,6 +429,38 @@ class Interslide_Vertical_Menu_Plugin {
 		);
 
 		add_settings_section(
+			'ivm_layout',
+			__( 'Layout Integration', 'interslide-vertical-menu' ),
+			'__return_false',
+			'interslide-vertical-menu'
+		);
+
+		add_settings_field(
+			'hide_theme_menu',
+			__( 'Hide existing theme menu', 'interslide-vertical-menu' ),
+			array( $this, 'render_checkbox_field' ),
+			'interslide-vertical-menu',
+			'ivm_layout',
+			array(
+				'label_for'   => 'ivm_hide_theme_menu',
+				'option_key'  => 'hide_theme_menu',
+				'description' => __( 'Hide the current theme header/navigation so the vertical menu becomes primary.', 'interslide-vertical-menu' ),
+			)
+		);
+
+		add_settings_field(
+			'hide_selectors',
+			__( 'Theme menu selectors', 'interslide-vertical-menu' ),
+			array( $this, 'render_text_field' ),
+			'interslide-vertical-menu',
+			'ivm_layout',
+			array(
+				'label_for'  => 'ivm_hide_selectors',
+				'option_key' => 'hide_selectors',
+			)
+		);
+
+		add_settings_section(
 			'ivm_cleanup',
 			__( 'Cleanup', 'interslide-vertical-menu' ),
 			'__return_false',
@@ -474,6 +508,8 @@ class Interslide_Vertical_Menu_Plugin {
 		$output['edition_enabled']      = isset( $input['edition_enabled'] ) ? 1 : 0;
 		$output['edition_options']      = $this->sanitize_items( $input['edition_options'] ?? array(), false );
 		$output['edition_default']      = $this->sanitize_number( $input['edition_default'] ?? $defaults['edition_default'], 0, 5 );
+		$output['hide_theme_menu']      = isset( $input['hide_theme_menu'] ) ? 1 : 0;
+		$output['hide_selectors']       = $this->sanitize_selectors( $input['hide_selectors'] ?? $defaults['hide_selectors'] );
 		$output['cleanup_on_uninstall'] = isset( $input['cleanup_on_uninstall'] ) ? 1 : 0;
 
 		return $output;
@@ -496,6 +532,12 @@ class Interslide_Vertical_Menu_Plugin {
 			return $max;
 		}
 		return $value;
+	}
+
+	private function sanitize_selectors( $value ) {
+		$value = sanitize_text_field( $value );
+		$value = preg_replace( '/[^\\w\\s\\#\\.\\,\\-\\[\\]\\=\\\"\\:\\*\\>\\+\\~\\(\\)\\@]/', '', $value );
+		return trim( $value );
 	}
 
 	private function sanitize_items( $items, $allow_icon ) {
@@ -596,6 +638,9 @@ class Interslide_Vertical_Menu_Plugin {
 			intval( $settings['sidebar_width'] ),
 			intval( $settings['mobile_breakpoint'] )
 		);
+		if ( $settings['hide_theme_menu'] && $settings['hide_selectors'] ) {
+			$inline_css .= sprintf( '%s{display:none !important;}', $settings['hide_selectors'] );
+		}
 		wp_add_inline_style( 'ivm-styles', $inline_css );
 
 		wp_localize_script(
