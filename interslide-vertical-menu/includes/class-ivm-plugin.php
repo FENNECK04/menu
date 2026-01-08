@@ -994,8 +994,8 @@ class Interslide_Vertical_Menu_Plugin {
 		ob_start();
 		?>
 		<nav class="<?php echo esc_attr( $wrapper_classes ); ?>" style="<?php echo esc_attr( $inline_style ); ?>" aria-label="<?php echo esc_attr__( 'Interslide menu', 'interslide-vertical-menu' ); ?>">
-			<div class="ivm__mobile-header">
-				<button class="ivm__toggle" aria-expanded="false" aria-controls="<?php echo esc_attr( $panel_id ); ?>">
+				<div class="ivm__mobile-header">
+					<button type="button" class="ivm__toggle" aria-expanded="false" aria-controls="<?php echo esc_attr( $panel_id ); ?>">
 					<span class="ivm__toggle-bar"></span>
 					<span class="ivm__toggle-bar"></span>
 					<span class="ivm__toggle-bar"></span>
