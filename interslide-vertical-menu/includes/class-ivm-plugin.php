@@ -56,6 +56,16 @@ class Interslide_Vertical_Menu_Plugin {
 			'text_color'         => '#111111',
 			'hover_color'        => '#f2f2f2',
 			'pill_color'         => '#2f6feb',
+			'divider_color'      => '#e5e5e5',
+			'font_family'        => '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+			'font_size'          => 14,
+			'link_padding_y'     => 6,
+			'link_padding_x'     => 8,
+			'border_radius'      => 8,
+			'panel_shadow'       => 0,
+			'header_bg'          => '#111111',
+			'header_text_color'  => '#ffffff',
+			'toggle_color'       => '#111111',
 			'sidebar_width'      => 280,
 			'mobile_breakpoint'  => 900,
 			'search_mode'        => 'link',
@@ -73,6 +83,12 @@ class Interslide_Vertical_Menu_Plugin {
 			'newsletter_enabled' => 0,
 			'newsletter_text'    => __( 'Subscribe', 'interslide-vertical-menu' ),
 			'newsletter_url'     => home_url( '/' ),
+			'utility_links'      => $this->get_default_utility_links(),
+			'trending_topics'    => $this->get_default_trending_topics(),
+			'account_enabled'    => 0,
+			'account_text'       => __( 'Sign in', 'interslide-vertical-menu' ),
+			'account_url'        => wp_login_url(),
+			'footer_text'        => '',
 			'mobile_menu_id'     => 0,
 			'use_wp_menus'       => 1,
 			'primary_menu_id'    => 0,
@@ -261,17 +277,41 @@ class Interslide_Vertical_Menu_Plugin {
 			)
 		);
 
-	add_settings_section(
-		'ivm_menu_items',
-		__( 'Menu Items', 'interslide-vertical-menu' ),
-		'__return_false',
-		'interslide-vertical-menu'
-	);
+		add_settings_section(
+			'ivm_menu_items',
+			__( 'Menu Items', 'interslide-vertical-menu' ),
+			'__return_false',
+			'interslide-vertical-menu'
+		);
 
-	add_settings_field(
-		'use_wp_menus',
-		__( 'Use WordPress menus', 'interslide-vertical-menu' ),
-		array( $this, 'render_checkbox_field' ),
+		add_settings_field(
+			'utility_links',
+			__( 'Utility links', 'interslide-vertical-menu' ),
+			array( $this, 'render_items_field' ),
+			'interslide-vertical-menu',
+			'ivm_menu_items',
+			array(
+				'option_key' => 'utility_links',
+				'label'      => __( 'Label|URL (one per line).', 'interslide-vertical-menu' ),
+			)
+		);
+
+		add_settings_field(
+			'trending_topics',
+			__( 'Trending topics', 'interslide-vertical-menu' ),
+			array( $this, 'render_items_field' ),
+			'interslide-vertical-menu',
+			'ivm_menu_items',
+			array(
+				'option_key' => 'trending_topics',
+				'label'      => __( 'Label|URL (one per line).', 'interslide-vertical-menu' ),
+			)
+		);
+
+		add_settings_field(
+			'use_wp_menus',
+			__( 'Use WordPress menus', 'interslide-vertical-menu' ),
+			array( $this, 'render_checkbox_field' ),
 		'interslide-vertical-menu',
 		'ivm_menu_items',
 		array(
@@ -488,6 +528,54 @@ class Interslide_Vertical_Menu_Plugin {
 		);
 
 		add_settings_field(
+			'account_enabled',
+			__( 'Enable account link', 'interslide-vertical-menu' ),
+			array( $this, 'render_checkbox_field' ),
+			'interslide-vertical-menu',
+			'ivm_features',
+			array(
+				'label_for'  => 'ivm_account_enabled',
+				'option_key' => 'account_enabled',
+			)
+		);
+
+		add_settings_field(
+			'account_text',
+			__( 'Account text', 'interslide-vertical-menu' ),
+			array( $this, 'render_text_field' ),
+			'interslide-vertical-menu',
+			'ivm_features',
+			array(
+				'label_for'  => 'ivm_account_text',
+				'option_key' => 'account_text',
+			)
+		);
+
+		add_settings_field(
+			'account_url',
+			__( 'Account URL', 'interslide-vertical-menu' ),
+			array( $this, 'render_text_field' ),
+			'interslide-vertical-menu',
+			'ivm_features',
+			array(
+				'label_for'  => 'ivm_account_url',
+				'option_key' => 'account_url',
+			)
+		);
+
+		add_settings_field(
+			'footer_text',
+			__( 'Footer text', 'interslide-vertical-menu' ),
+			array( $this, 'render_text_field' ),
+			'interslide-vertical-menu',
+			'ivm_features',
+			array(
+				'label_for'  => 'ivm_footer_text',
+				'option_key' => 'footer_text',
+			)
+		);
+
+		add_settings_field(
 			'mobile_menu_id',
 			__( 'Mobile menu', 'interslide-vertical-menu' ),
 			array( $this, 'render_menu_select_field' ),
@@ -512,6 +600,18 @@ class Interslide_Vertical_Menu_Plugin {
 		);
 
 		add_settings_field(
+			'divider_color',
+			__( 'Divider Color', 'interslide-vertical-menu' ),
+			array( $this, 'render_color_field' ),
+			'interslide-vertical-menu',
+			'ivm_style',
+			array(
+				'label_for'  => 'ivm_divider_color',
+				'option_key' => 'divider_color',
+			)
+		);
+
+		add_settings_field(
 			'text_color',
 			__( 'Text Color', 'interslide-vertical-menu' ),
 			array( $this, 'render_color_field' ),
@@ -520,6 +620,32 @@ class Interslide_Vertical_Menu_Plugin {
 			array(
 				'label_for'  => 'ivm_text_color',
 				'option_key' => 'text_color',
+			)
+		);
+
+		add_settings_field(
+			'font_family',
+			__( 'Font Family', 'interslide-vertical-menu' ),
+			array( $this, 'render_text_field' ),
+			'interslide-vertical-menu',
+			'ivm_style',
+			array(
+				'label_for'  => 'ivm_font_family',
+				'option_key' => 'font_family',
+			)
+		);
+
+		add_settings_field(
+			'font_size',
+			__( 'Base Font Size (px)', 'interslide-vertical-menu' ),
+			array( $this, 'render_number_field' ),
+			'interslide-vertical-menu',
+			'ivm_style',
+			array(
+				'label_for'  => 'ivm_font_size',
+				'option_key' => 'font_size',
+				'min'        => 12,
+				'max'        => 18,
 			)
 		);
 
@@ -536,6 +662,48 @@ class Interslide_Vertical_Menu_Plugin {
 		);
 
 		add_settings_field(
+			'border_radius',
+			__( 'Border Radius (px)', 'interslide-vertical-menu' ),
+			array( $this, 'render_number_field' ),
+			'interslide-vertical-menu',
+			'ivm_style',
+			array(
+				'label_for'  => 'ivm_border_radius',
+				'option_key' => 'border_radius',
+				'min'        => 0,
+				'max'        => 16,
+			)
+		);
+
+		add_settings_field(
+			'link_padding_y',
+			__( 'Link Padding Y (px)', 'interslide-vertical-menu' ),
+			array( $this, 'render_number_field' ),
+			'interslide-vertical-menu',
+			'ivm_style',
+			array(
+				'label_for'  => 'ivm_link_padding_y',
+				'option_key' => 'link_padding_y',
+				'min'        => 4,
+				'max'        => 16,
+			)
+		);
+
+		add_settings_field(
+			'link_padding_x',
+			__( 'Link Padding X (px)', 'interslide-vertical-menu' ),
+			array( $this, 'render_number_field' ),
+			'interslide-vertical-menu',
+			'ivm_style',
+			array(
+				'label_for'  => 'ivm_link_padding_x',
+				'option_key' => 'link_padding_x',
+				'min'        => 6,
+				'max'        => 20,
+			)
+		);
+
+		add_settings_field(
 			'pill_color',
 			__( 'Pill Color', 'interslide-vertical-menu' ),
 			array( $this, 'render_color_field' ),
@@ -544,6 +712,56 @@ class Interslide_Vertical_Menu_Plugin {
 			array(
 				'label_for'  => 'ivm_pill_color',
 				'option_key' => 'pill_color',
+			)
+		);
+
+		add_settings_field(
+			'panel_shadow',
+			__( 'Panel Shadow (0/1)', 'interslide-vertical-menu' ),
+			array( $this, 'render_number_field' ),
+			'interslide-vertical-menu',
+			'ivm_style',
+			array(
+				'label_for'  => 'ivm_panel_shadow',
+				'option_key' => 'panel_shadow',
+				'min'        => 0,
+				'max'        => 1,
+			)
+		);
+
+		add_settings_field(
+			'header_bg',
+			__( 'Mobile Header Background', 'interslide-vertical-menu' ),
+			array( $this, 'render_color_field' ),
+			'interslide-vertical-menu',
+			'ivm_style',
+			array(
+				'label_for'  => 'ivm_header_bg',
+				'option_key' => 'header_bg',
+			)
+		);
+
+		add_settings_field(
+			'header_text_color',
+			__( 'Mobile Header Text', 'interslide-vertical-menu' ),
+			array( $this, 'render_color_field' ),
+			'interslide-vertical-menu',
+			'ivm_style',
+			array(
+				'label_for'  => 'ivm_header_text_color',
+				'option_key' => 'header_text_color',
+			)
+		);
+
+		add_settings_field(
+			'toggle_color',
+			__( 'Toggle Icon Color', 'interslide-vertical-menu' ),
+			array( $this, 'render_color_field' ),
+			'interslide-vertical-menu',
+			'ivm_style',
+			array(
+				'label_for'  => 'ivm_toggle_color',
+				'option_key' => 'toggle_color',
 			)
 		);
 
@@ -717,9 +935,19 @@ class Interslide_Vertical_Menu_Plugin {
 		$output['secondary_items']      = $this->sanitize_items( $input['secondary_items'] ?? array(), true );
 		$output['bottom_items']         = $this->sanitize_items( $input['bottom_items'] ?? array(), false );
 		$output['background_color']     = sanitize_hex_color( $input['background_color'] ?? $defaults['background_color'] );
+		$output['divider_color']        = sanitize_hex_color( $input['divider_color'] ?? $defaults['divider_color'] );
 		$output['text_color']           = sanitize_hex_color( $input['text_color'] ?? $defaults['text_color'] );
 		$output['hover_color']          = sanitize_hex_color( $input['hover_color'] ?? $defaults['hover_color'] );
 		$output['pill_color']           = sanitize_hex_color( $input['pill_color'] ?? $defaults['pill_color'] );
+		$output['font_family']          = sanitize_text_field( $input['font_family'] ?? $defaults['font_family'] );
+		$output['font_size']            = $this->sanitize_number( $input['font_size'] ?? $defaults['font_size'], 12, 20 );
+		$output['link_padding_y']       = $this->sanitize_number( $input['link_padding_y'] ?? $defaults['link_padding_y'], 4, 20 );
+		$output['link_padding_x']       = $this->sanitize_number( $input['link_padding_x'] ?? $defaults['link_padding_x'], 6, 24 );
+		$output['border_radius']        = $this->sanitize_number( $input['border_radius'] ?? $defaults['border_radius'], 0, 20 );
+		$output['panel_shadow']         = $this->sanitize_number( $input['panel_shadow'] ?? $defaults['panel_shadow'], 0, 1 );
+		$output['header_bg']            = sanitize_hex_color( $input['header_bg'] ?? $defaults['header_bg'] );
+		$output['header_text_color']    = sanitize_hex_color( $input['header_text_color'] ?? $defaults['header_text_color'] );
+		$output['toggle_color']         = sanitize_hex_color( $input['toggle_color'] ?? $defaults['toggle_color'] );
 		$output['sidebar_width']        = $this->sanitize_number( $input['sidebar_width'] ?? $defaults['sidebar_width'], 200, 400 );
 		$output['mobile_breakpoint']    = $this->sanitize_number( $input['mobile_breakpoint'] ?? $defaults['mobile_breakpoint'], 600, 1600 );
 		$output['search_mode']          = ( 'inline' === ( $input['search_mode'] ?? '' ) ) ? 'inline' : 'link';
@@ -737,6 +965,12 @@ class Interslide_Vertical_Menu_Plugin {
 		$output['newsletter_enabled']   = isset( $input['newsletter_enabled'] ) ? 1 : 0;
 		$output['newsletter_text']      = sanitize_text_field( $input['newsletter_text'] ?? $defaults['newsletter_text'] );
 		$output['newsletter_url']       = esc_url_raw( $input['newsletter_url'] ?? $defaults['newsletter_url'] );
+		$output['utility_links']        = $this->sanitize_items( $input['utility_links'] ?? array(), false );
+		$output['trending_topics']      = $this->sanitize_items( $input['trending_topics'] ?? array(), false );
+		$output['account_enabled']      = isset( $input['account_enabled'] ) ? 1 : 0;
+		$output['account_text']         = sanitize_text_field( $input['account_text'] ?? $defaults['account_text'] );
+		$output['account_url']          = esc_url_raw( $input['account_url'] ?? $defaults['account_url'] );
+		$output['footer_text']          = wp_kses_post( $input['footer_text'] ?? $defaults['footer_text'] );
 		$output['mobile_menu_id']       = absint( $input['mobile_menu_id'] ?? 0 );
 		$output['use_wp_menus']         = isset( $input['use_wp_menus'] ) ? 1 : 0;
 		$output['primary_menu_id']      = absint( $input['primary_menu_id'] ?? 0 );
@@ -1105,6 +1339,21 @@ class Interslide_Vertical_Menu_Plugin {
 		);
 	}
 
+	private function get_default_utility_links() {
+		return array(
+			array( 'label' => __( 'Contact', 'interslide-vertical-menu' ), 'url' => home_url( '/contact/' ) ),
+			array( 'label' => __( 'À propos', 'interslide-vertical-menu' ), 'url' => home_url( '/a-propos/' ) ),
+		);
+	}
+
+	private function get_default_trending_topics() {
+		return array(
+			array( 'label' => __( 'Économie', 'interslide-vertical-menu' ), 'url' => home_url( '/economie/' ) ),
+			array( 'label' => __( 'Tech', 'interslide-vertical-menu' ), 'url' => home_url( '/technologie/' ) ),
+			array( 'label' => __( 'Culture', 'interslide-vertical-menu' ), 'url' => home_url( '/culture/' ) ),
+		);
+	}
+
 	private function get_default_editions() {
 		return array(
 			array( 'label' => __( 'Édition marocaine', 'interslide-vertical-menu' ), 'url' => home_url( '/' ) ),
@@ -1144,12 +1393,22 @@ class Interslide_Vertical_Menu_Plugin {
 		}
 
 		$inline_style = sprintf(
-			'--ivm-width:%dpx;--ivm-bg:%s;--ivm-text:%s;--ivm-hover:%s;--ivm-pill:%s;',
+			'--ivm-width:%dpx;--ivm-bg:%s;--ivm-text:%s;--ivm-hover:%s;--ivm-pill:%s;--ivm-divider:%s;--ivm-font:%s;--ivm-font-size:%dpx;--ivm-link-pad-y:%dpx;--ivm-link-pad-x:%dpx;--ivm-radius:%dpx;--ivm-shadow:%s;--ivm-header-bg:%s;--ivm-header-text:%s;--ivm-toggle:%s;',
 			intval( $settings['sidebar_width'] ),
 			esc_attr( $settings['background_color'] ),
 			esc_attr( $settings['text_color'] ),
 			esc_attr( $settings['hover_color'] ),
-			esc_attr( $settings['pill_color'] )
+			esc_attr( $settings['pill_color'] ),
+			esc_attr( $settings['divider_color'] ),
+			esc_attr( $settings['font_family'] ),
+			intval( $settings['font_size'] ),
+			intval( $settings['link_padding_y'] ),
+			intval( $settings['link_padding_x'] ),
+			intval( $settings['border_radius'] ),
+			( 1 === (int) $settings['panel_shadow'] ) ? '0 10px 30px rgba(0,0,0,0.15)' : 'none',
+			esc_attr( $settings['header_bg'] ),
+			esc_attr( $settings['header_text_color'] ),
+			esc_attr( $settings['toggle_color'] )
 		);
 
 		ob_start();
@@ -1176,6 +1435,9 @@ class Interslide_Vertical_Menu_Plugin {
 						</a>
 					<?php endif; ?>
 				</div>
+				<?php if ( ! empty( $settings['utility_links'] ) ) : ?>
+					<?php echo $this->render_links_list( $settings['utility_links'], 'ivm__utility' ); ?>
+				<?php endif; ?>
 				<?php if ( $settings['breaking_enabled'] || $settings['live_enabled'] || $settings['date_enabled'] ) : ?>
 					<div class="ivm__meta">
 						<?php if ( $settings['breaking_enabled'] && $settings['breaking_text'] ) : ?>
@@ -1203,6 +1465,16 @@ class Interslide_Vertical_Menu_Plugin {
 						</div>
 					<?php endif; ?>
 				</div>
+				<?php if ( ! empty( $settings['trending_topics'] ) ) : ?>
+					<div class="ivm__trending">
+						<span class="ivm__trending-label"><?php echo esc_html__( 'Trending', 'interslide-vertical-menu' ); ?></span>
+						<div class="ivm__trending-items">
+							<?php foreach ( $settings['trending_topics'] as $item ) : ?>
+								<a class="ivm__chip" href="<?php echo esc_url( $item['url'] ); ?>"><?php echo esc_html( $item['label'] ); ?></a>
+							<?php endforeach; ?>
+						</div>
+					</div>
+				<?php endif; ?>
 				<hr class="ivm__divider" />
 				<div class="ivm__section">
 					<?php echo $this->render_menu_section( $settings, 'secondary', $settings['secondary_items'] ); ?>
@@ -1237,6 +1509,11 @@ class Interslide_Vertical_Menu_Plugin {
 							</a>
 						</div>
 					<?php endif; ?>
+					<?php if ( $settings['account_enabled'] && $settings['account_text'] ) : ?>
+						<a class="ivm__account" href="<?php echo esc_url( $settings['account_url'] ); ?>">
+							<?php echo esc_html( $settings['account_text'] ); ?>
+						</a>
+					<?php endif; ?>
 				</div>
 				<?php if ( $settings['edition_enabled'] && ! empty( $settings['edition_options'] ) ) : ?>
 					<div class="ivm__edition">
@@ -1247,6 +1524,9 @@ class Interslide_Vertical_Menu_Plugin {
 							<?php endforeach; ?>
 						</select>
 					</div>
+				<?php endif; ?>
+				<?php if ( $settings['footer_text'] ) : ?>
+					<div class="ivm__footer"><?php echo wp_kses_post( $settings['footer_text'] ); ?></div>
 				<?php endif; ?>
 			</div>
 		</nav>
@@ -1291,6 +1571,18 @@ class Interslide_Vertical_Menu_Plugin {
 						<span class="ivm__label"><?php echo esc_html( $item['label'] ); ?></span>
 					</a>
 				</li>
+			<?php endforeach; ?>
+		</ul>
+		<?php
+		return ob_get_clean();
+	}
+
+	private function render_links_list( $items, $class ) {
+		ob_start();
+		?>
+		<ul class="<?php echo esc_attr( $class ); ?>">
+			<?php foreach ( $items as $item ) : ?>
+				<li><a href="<?php echo esc_url( $item['url'] ); ?>"><?php echo esc_html( $item['label'] ); ?></a></li>
 			<?php endforeach; ?>
 		</ul>
 		<?php
