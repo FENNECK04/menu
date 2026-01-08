@@ -63,6 +63,16 @@ class Interslide_Vertical_Menu_Plugin {
 			'edition_enabled'    => 0,
 			'edition_options'    => $this->get_default_editions(),
 			'edition_default'    => 0,
+			'breaking_enabled'   => 0,
+			'breaking_text'      => __( 'Breaking news', 'interslide-vertical-menu' ),
+			'breaking_url'       => home_url( '/' ),
+			'live_enabled'       => 0,
+			'live_text'          => __( 'Live', 'interslide-vertical-menu' ),
+			'live_url'           => home_url( '/' ),
+			'date_enabled'       => 1,
+			'newsletter_enabled' => 0,
+			'newsletter_text'    => __( 'Subscribe', 'interslide-vertical-menu' ),
+			'newsletter_url'     => home_url( '/' ),
 			'use_wp_menus'       => 1,
 			'primary_menu_id'    => 0,
 			'secondary_menu_id'  => 0,
@@ -349,6 +359,133 @@ class Interslide_Vertical_Menu_Plugin {
 			'interslide-vertical-menu'
 		);
 
+		add_settings_section(
+			'ivm_features',
+			__( 'Editorial Features', 'interslide-vertical-menu' ),
+			'__return_false',
+			'interslide-vertical-menu'
+		);
+
+		add_settings_field(
+			'breaking_enabled',
+			__( 'Enable breaking bar', 'interslide-vertical-menu' ),
+			array( $this, 'render_checkbox_field' ),
+			'interslide-vertical-menu',
+			'ivm_features',
+			array(
+				'label_for'  => 'ivm_breaking_enabled',
+				'option_key' => 'breaking_enabled',
+			)
+		);
+
+		add_settings_field(
+			'breaking_text',
+			__( 'Breaking text', 'interslide-vertical-menu' ),
+			array( $this, 'render_text_field' ),
+			'interslide-vertical-menu',
+			'ivm_features',
+			array(
+				'label_for'  => 'ivm_breaking_text',
+				'option_key' => 'breaking_text',
+			)
+		);
+
+		add_settings_field(
+			'breaking_url',
+			__( 'Breaking URL', 'interslide-vertical-menu' ),
+			array( $this, 'render_text_field' ),
+			'interslide-vertical-menu',
+			'ivm_features',
+			array(
+				'label_for'  => 'ivm_breaking_url',
+				'option_key' => 'breaking_url',
+			)
+		);
+
+		add_settings_field(
+			'live_enabled',
+			__( 'Enable live badge', 'interslide-vertical-menu' ),
+			array( $this, 'render_checkbox_field' ),
+			'interslide-vertical-menu',
+			'ivm_features',
+			array(
+				'label_for'  => 'ivm_live_enabled',
+				'option_key' => 'live_enabled',
+			)
+		);
+
+		add_settings_field(
+			'live_text',
+			__( 'Live text', 'interslide-vertical-menu' ),
+			array( $this, 'render_text_field' ),
+			'interslide-vertical-menu',
+			'ivm_features',
+			array(
+				'label_for'  => 'ivm_live_text',
+				'option_key' => 'live_text',
+			)
+		);
+
+		add_settings_field(
+			'live_url',
+			__( 'Live URL', 'interslide-vertical-menu' ),
+			array( $this, 'render_text_field' ),
+			'interslide-vertical-menu',
+			'ivm_features',
+			array(
+				'label_for'  => 'ivm_live_url',
+				'option_key' => 'live_url',
+			)
+		);
+
+		add_settings_field(
+			'date_enabled',
+			__( 'Show date', 'interslide-vertical-menu' ),
+			array( $this, 'render_checkbox_field' ),
+			'interslide-vertical-menu',
+			'ivm_features',
+			array(
+				'label_for'  => 'ivm_date_enabled',
+				'option_key' => 'date_enabled',
+			)
+		);
+
+		add_settings_field(
+			'newsletter_enabled',
+			__( 'Enable newsletter link', 'interslide-vertical-menu' ),
+			array( $this, 'render_checkbox_field' ),
+			'interslide-vertical-menu',
+			'ivm_features',
+			array(
+				'label_for'  => 'ivm_newsletter_enabled',
+				'option_key' => 'newsletter_enabled',
+			)
+		);
+
+		add_settings_field(
+			'newsletter_text',
+			__( 'Newsletter text', 'interslide-vertical-menu' ),
+			array( $this, 'render_text_field' ),
+			'interslide-vertical-menu',
+			'ivm_features',
+			array(
+				'label_for'  => 'ivm_newsletter_text',
+				'option_key' => 'newsletter_text',
+			)
+		);
+
+		add_settings_field(
+			'newsletter_url',
+			__( 'Newsletter URL', 'interslide-vertical-menu' ),
+			array( $this, 'render_text_field' ),
+			'interslide-vertical-menu',
+			'ivm_features',
+			array(
+				'label_for'  => 'ivm_newsletter_url',
+				'option_key' => 'newsletter_url',
+			)
+		);
+
 		add_settings_field(
 			'background_color',
 			__( 'Background Color', 'interslide-vertical-menu' ),
@@ -574,16 +711,26 @@ class Interslide_Vertical_Menu_Plugin {
 		$output['mobile_breakpoint']    = $this->sanitize_number( $input['mobile_breakpoint'] ?? $defaults['mobile_breakpoint'], 600, 1600 );
 		$output['search_mode']          = ( 'inline' === ( $input['search_mode'] ?? '' ) ) ? 'inline' : 'link';
 		$output['search_url']           = esc_url_raw( $input['search_url'] ?? $defaults['search_url'] );
-	$output['edition_enabled']      = isset( $input['edition_enabled'] ) ? 1 : 0;
-	$output['edition_options']      = $this->sanitize_items( $input['edition_options'] ?? array(), false );
-	$output['edition_default']      = $this->sanitize_number( $input['edition_default'] ?? $defaults['edition_default'], 0, 5 );
-	$output['use_wp_menus']         = isset( $input['use_wp_menus'] ) ? 1 : 0;
-	$output['primary_menu_id']      = absint( $input['primary_menu_id'] ?? 0 );
-	$output['secondary_menu_id']    = absint( $input['secondary_menu_id'] ?? 0 );
-	$output['bottom_menu_id']       = absint( $input['bottom_menu_id'] ?? 0 );
-	$output['hide_theme_menu']      = isset( $input['hide_theme_menu'] ) ? 1 : 0;
-	$output['hide_selectors']       = $this->sanitize_selectors( $input['hide_selectors'] ?? $defaults['hide_selectors'] );
-	$output['cleanup_on_uninstall'] = isset( $input['cleanup_on_uninstall'] ) ? 1 : 0;
+		$output['edition_enabled']      = isset( $input['edition_enabled'] ) ? 1 : 0;
+		$output['edition_options']      = $this->sanitize_items( $input['edition_options'] ?? array(), false );
+		$output['edition_default']      = $this->sanitize_number( $input['edition_default'] ?? $defaults['edition_default'], 0, 5 );
+		$output['breaking_enabled']     = isset( $input['breaking_enabled'] ) ? 1 : 0;
+		$output['breaking_text']        = sanitize_text_field( $input['breaking_text'] ?? $defaults['breaking_text'] );
+		$output['breaking_url']         = esc_url_raw( $input['breaking_url'] ?? $defaults['breaking_url'] );
+		$output['live_enabled']         = isset( $input['live_enabled'] ) ? 1 : 0;
+		$output['live_text']            = sanitize_text_field( $input['live_text'] ?? $defaults['live_text'] );
+		$output['live_url']             = esc_url_raw( $input['live_url'] ?? $defaults['live_url'] );
+		$output['date_enabled']         = isset( $input['date_enabled'] ) ? 1 : 0;
+		$output['newsletter_enabled']   = isset( $input['newsletter_enabled'] ) ? 1 : 0;
+		$output['newsletter_text']      = sanitize_text_field( $input['newsletter_text'] ?? $defaults['newsletter_text'] );
+		$output['newsletter_url']       = esc_url_raw( $input['newsletter_url'] ?? $defaults['newsletter_url'] );
+		$output['use_wp_menus']         = isset( $input['use_wp_menus'] ) ? 1 : 0;
+		$output['primary_menu_id']      = absint( $input['primary_menu_id'] ?? 0 );
+		$output['secondary_menu_id']    = absint( $input['secondary_menu_id'] ?? 0 );
+		$output['bottom_menu_id']       = absint( $input['bottom_menu_id'] ?? 0 );
+		$output['hide_theme_menu']      = isset( $input['hide_theme_menu'] ) ? 1 : 0;
+		$output['hide_selectors']       = $this->sanitize_selectors( $input['hide_selectors'] ?? $defaults['hide_selectors'] );
+		$output['cleanup_on_uninstall'] = isset( $input['cleanup_on_uninstall'] ) ? 1 : 0;
 
 		return $output;
 	}
@@ -1017,6 +1164,25 @@ class Interslide_Vertical_Menu_Plugin {
 						</a>
 					<?php endif; ?>
 				</div>
+				<?php if ( $settings['breaking_enabled'] || $settings['live_enabled'] || $settings['date_enabled'] ) : ?>
+					<div class="ivm__meta">
+						<?php if ( $settings['breaking_enabled'] && $settings['breaking_text'] ) : ?>
+							<a class="ivm__breaking" href="<?php echo esc_url( $settings['breaking_url'] ); ?>">
+								<span class="ivm__badge"><?php echo esc_html__( 'Breaking', 'interslide-vertical-menu' ); ?></span>
+								<span class="ivm__breaking-text"><?php echo esc_html( $settings['breaking_text'] ); ?></span>
+							</a>
+						<?php endif; ?>
+						<?php if ( $settings['live_enabled'] && $settings['live_text'] ) : ?>
+							<a class="ivm__live" href="<?php echo esc_url( $settings['live_url'] ); ?>">
+								<span class="ivm__live-dot"></span>
+								<span class="ivm__live-text"><?php echo esc_html( $settings['live_text'] ); ?></span>
+							</a>
+						<?php endif; ?>
+						<?php if ( $settings['date_enabled'] ) : ?>
+							<span class="ivm__date"><?php echo esc_html( date_i18n( get_option( 'date_format' ) ) ); ?></span>
+						<?php endif; ?>
+					</div>
+				<?php endif; ?>
 				<div class="ivm__section">
 					<?php echo $this->render_menu_section( $settings, 'primary', $settings['primary_items'] ); ?>
 				</div>
@@ -1047,6 +1213,13 @@ class Interslide_Vertical_Menu_Plugin {
 				<hr class="ivm__divider" />
 				<div class="ivm__section">
 					<?php echo $this->render_menu_section( $settings, 'bottom', $settings['bottom_items'] ); ?>
+					<?php if ( $settings['newsletter_enabled'] && $settings['newsletter_text'] ) : ?>
+						<div class="ivm__newsletter">
+							<a class="ivm__newsletter-link" href="<?php echo esc_url( $settings['newsletter_url'] ); ?>">
+								<?php echo esc_html( $settings['newsletter_text'] ); ?>
+							</a>
+						</div>
+					<?php endif; ?>
 				</div>
 				<?php if ( $settings['edition_enabled'] && ! empty( $settings['edition_options'] ) ) : ?>
 					<div class="ivm__edition">

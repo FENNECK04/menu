@@ -145,6 +145,7 @@
 	justify-content: center;
 	gap: 4px;
 	z-index: 10000;
+	cursor: pointer;
 }
 
 .ivm__toggle-bar {
@@ -159,6 +160,74 @@
 	inset: 0;
 	background: rgba(0, 0, 0, 0.4);
 	z-index: 9999;
+}
+
+.ivm__meta {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	margin-bottom: 20px;
+}
+
+.ivm__breaking {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	text-decoration: none;
+	color: inherit;
+	font-size: 13px;
+}
+
+.ivm__badge {
+	background: #e10600;
+	color: #fff;
+	font-size: 10px;
+	text-transform: uppercase;
+	letter-spacing: 0.08em;
+	padding: 3px 6px;
+	border-radius: 4px;
+}
+
+.ivm__breaking-text {
+	font-weight: 600;
+}
+
+.ivm__live {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	text-decoration: none;
+	color: inherit;
+	font-size: 12px;
+}
+
+.ivm__live-dot {
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	background: #e10600;
+	display: inline-block;
+}
+
+.ivm__date {
+	font-size: 12px;
+	color: #555;
+}
+
+.ivm__newsletter {
+	margin-top: 12px;
+}
+
+.ivm__newsletter-link {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	padding: 8px 12px;
+	border-radius: 999px;
+	background: #111;
+	color: #fff;
+	text-decoration: none;
+	font-size: 12px;
 }
 
 .ivm__mobile-header {
