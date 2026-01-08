@@ -73,6 +73,7 @@ class Interslide_Vertical_Menu_Plugin {
 			'newsletter_enabled' => 0,
 			'newsletter_text'    => __( 'Subscribe', 'interslide-vertical-menu' ),
 			'newsletter_url'     => home_url( '/' ),
+			'mobile_menu_id'     => 0,
 			'use_wp_menus'       => 1,
 			'primary_menu_id'    => 0,
 			'secondary_menu_id'  => 0,
@@ -487,6 +488,18 @@ class Interslide_Vertical_Menu_Plugin {
 		);
 
 		add_settings_field(
+			'mobile_menu_id',
+			__( 'Mobile menu', 'interslide-vertical-menu' ),
+			array( $this, 'render_menu_select_field' ),
+			'interslide-vertical-menu',
+			'ivm_menu_items',
+			array(
+				'label_for'  => 'ivm_mobile_menu_id',
+				'option_key' => 'mobile_menu_id',
+			)
+		);
+
+		add_settings_field(
 			'background_color',
 			__( 'Background Color', 'interslide-vertical-menu' ),
 			array( $this, 'render_color_field' ),
@@ -724,6 +737,7 @@ class Interslide_Vertical_Menu_Plugin {
 		$output['newsletter_enabled']   = isset( $input['newsletter_enabled'] ) ? 1 : 0;
 		$output['newsletter_text']      = sanitize_text_field( $input['newsletter_text'] ?? $defaults['newsletter_text'] );
 		$output['newsletter_url']       = esc_url_raw( $input['newsletter_url'] ?? $defaults['newsletter_url'] );
+		$output['mobile_menu_id']       = absint( $input['mobile_menu_id'] ?? 0 );
 		$output['use_wp_menus']         = isset( $input['use_wp_menus'] ) ? 1 : 0;
 		$output['primary_menu_id']      = absint( $input['primary_menu_id'] ?? 0 );
 		$output['secondary_menu_id']    = absint( $input['secondary_menu_id'] ?? 0 );
@@ -854,7 +868,7 @@ class Interslide_Vertical_Menu_Plugin {
 		);
 
 		$inline_css = sprintf(
-			':root{--ivm-width:%dpx;}@media (max-width:%dpx){.ivm__panel{transform:translateX(-100%%);transition:transform .25s ease;position:fixed;padding-top:80px;}.ivm--open .ivm__panel{transform:translateX(0);}.ivm__mobile-header{display:flex;}.ivm-body{margin-left:0;}}',
+			':root{--ivm-width:%dpx;}@media (max-width:%dpx){.ivm__panel{transform:translateX(-100%%);transition:transform .25s ease;position:fixed;padding-top:80px;}.ivm--open .ivm__panel{transform:translateX(0);}.ivm__mobile-header{display:flex;}.ivm-body{margin-left:0;}.ivm__mobile-only{display:block;}}',
 			intval( $settings['sidebar_width'] ),
 			intval( $settings['mobile_breakpoint'] )
 		);
@@ -1143,15 +1157,13 @@ class Interslide_Vertical_Menu_Plugin {
 		<nav class="<?php echo esc_attr( $wrapper_classes ); ?>" style="<?php echo esc_attr( $inline_style ); ?>" aria-label="<?php echo esc_attr__( 'Interslide menu', 'interslide-vertical-menu' ); ?>">
 				<div class="ivm__mobile-header">
 					<button type="button" class="ivm__toggle" aria-expanded="false" aria-controls="<?php echo esc_attr( $panel_id ); ?>">
-					<span class="ivm__toggle-bar"></span>
-					<span class="ivm__toggle-bar"></span>
-					<span class="ivm__toggle-bar"></span>
-					<span class="screen-reader-text"><?php echo esc_html__( 'Open menu', 'interslide-vertical-menu' ); ?></span>
-				</button>
-				<a class="ivm__mobile-logo" href="<?php echo esc_url( $settings['logo_link'] ); ?>">
-					<?php echo $logo; ?>
-				</a>
-			</div>
+						<span class="ivm__toggle-icon" aria-hidden="true"></span>
+						<span class="screen-reader-text"><?php echo esc_html__( 'Open menu', 'interslide-vertical-menu' ); ?></span>
+					</button>
+					<a class="ivm__mobile-logo" href="<?php echo esc_url( $settings['logo_link'] ); ?>">
+						<?php echo $logo; ?>
+					</a>
+				</div>
 			<div class="ivm__overlay" tabindex="-1" hidden></div>
 			<div class="ivm__panel" id="<?php echo esc_attr( $panel_id ); ?>" role="dialog" aria-modal="true" aria-hidden="<?php echo esc_attr( 'fixed' === $mode ? 'false' : 'true' ); ?>">
 				<div class="ivm__header">
@@ -1185,6 +1197,11 @@ class Interslide_Vertical_Menu_Plugin {
 				<?php endif; ?>
 				<div class="ivm__section">
 					<?php echo $this->render_menu_section( $settings, 'primary', $settings['primary_items'] ); ?>
+					<?php if ( $settings['mobile_menu_id'] ) : ?>
+						<div class="ivm__mobile-only">
+							<?php echo $this->render_menu_section( $settings, 'mobile', $settings['primary_items'] ); ?>
+						</div>
+					<?php endif; ?>
 				</div>
 				<hr class="ivm__divider" />
 				<div class="ivm__section">
@@ -1245,9 +1262,11 @@ class Interslide_Vertical_Menu_Plugin {
 			$menu_id = (int) $settings['secondary_menu_id'];
 		} elseif ( 'bottom' === $section ) {
 			$menu_id = (int) $settings['bottom_menu_id'];
+		} elseif ( 'mobile' === $section ) {
+			$menu_id = (int) $settings['mobile_menu_id'];
 		}
 
-		if ( $settings['use_wp_menus'] && $menu_id ) {
+		if ( ( $settings['use_wp_menus'] || 'mobile' === $section ) && $menu_id ) {
 			return wp_nav_menu(
 				array(
 					'menu'        => $menu_id,

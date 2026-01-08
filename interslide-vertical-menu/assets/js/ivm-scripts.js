@@ -106,23 +106,7 @@
 		});
 	});
 
-	document.addEventListener('click', function (event) {
-		var button = event.target.closest('.ivm__toggle');
-		if (!button) {
-			return;
-		}
-		var menu = button.closest('.ivm');
-		if (!menu) {
-			return;
-		}
-		var state = getMenuState(menu);
-		if (!state.panel || !state.toggle || !state.overlay) {
-			return;
-		}
-		handleToggle(event, menu, state);
-	});
-
-	menus.forEach(function (menu) {
+		menus.forEach(function (menu) {
 		var editionSelect = menu.querySelector('.ivm__edition-select');
 		if (editionSelect) {
 			editionSelect.addEventListener('change', function () {

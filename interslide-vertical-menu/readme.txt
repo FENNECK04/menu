@@ -23,6 +23,7 @@ Add a minimal, brut-style vertical menu inspired by brute.media. Includes global
 * To replace your theme menu: enable “Hide existing theme menu” and adjust the selector list if needed.
 * WordPress menus: create menus in Appearance → Menus and assign them in the plugin settings. Add icon classes like `ivm-icon-flag` to menu items.
 * Editorial features: enable the breaking bar, live badge, date, and newsletter link in the settings for a newsroom-style menu.
+* Mobile menu: choose a dedicated mobile menu in the plugin settings (optional).
 
 == FAQ ==
 = Does the plugin include a search field? =
