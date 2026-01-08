@@ -8,6 +8,11 @@ class Interslide_Vertical_Menu_Plugin {
 	private static $instance = null;
 	private $option_name = 'ivm_settings';
 	private $displayed = false;
+	private $menu_locations = array(
+		'ivm_primary'   => 'ivm_primary',
+		'ivm_secondary' => 'ivm_secondary',
+		'ivm_bottom'    => 'ivm_bottom',
+	);
 
 	public static function get_instance() {
 		if ( null === self::$instance ) {
@@ -18,6 +23,7 @@ class Interslide_Vertical_Menu_Plugin {
 
 	private function __construct() {
 		add_action( 'init', array( $this, 'register_textdomain' ) );
+		add_action( 'init', array( $this, 'register_menu_locations' ) );
 		add_action( 'init', array( $this, 'register_shortcode' ) );
 		add_action( 'init', array( $this, 'register_block' ) );
 		add_action( 'admin_menu', array( $this, 'register_settings_page' ) );
@@ -57,6 +63,10 @@ class Interslide_Vertical_Menu_Plugin {
 			'edition_enabled'    => 0,
 			'edition_options'    => $this->get_default_editions(),
 			'edition_default'    => 0,
+			'use_wp_menus'       => 1,
+			'primary_menu_id'    => 0,
+			'secondary_menu_id'  => 0,
+			'bottom_menu_id'     => 0,
 			'hide_theme_menu'    => 0,
 			'hide_selectors'     => '.site-header, .main-navigation, nav[aria-label="Primary"], nav.wp-block-navigation',
 			'cleanup_on_uninstall' => 0,
@@ -90,6 +100,16 @@ class Interslide_Vertical_Menu_Plugin {
 			IVM_PLUGIN_DIR . 'includes/block.json',
 			array(
 				'render_callback' => array( $this, 'render_block' ),
+			)
+		);
+	}
+
+	public function register_menu_locations() {
+		register_nav_menus(
+			array(
+				'ivm_primary'   => __( 'Interslide Primary Menu', 'interslide-vertical-menu' ),
+				'ivm_secondary' => __( 'Interslide Secondary Menu', 'interslide-vertical-menu' ),
+				'ivm_bottom'    => __( 'Interslide Bottom Menu', 'interslide-vertical-menu' ),
 			)
 		);
 	}
@@ -230,16 +250,65 @@ class Interslide_Vertical_Menu_Plugin {
 			)
 		);
 
-		add_settings_section(
-			'ivm_menu_items',
-			__( 'Menu Items', 'interslide-vertical-menu' ),
-			'__return_false',
-			'interslide-vertical-menu'
-		);
+	add_settings_section(
+		'ivm_menu_items',
+		__( 'Menu Items', 'interslide-vertical-menu' ),
+		'__return_false',
+		'interslide-vertical-menu'
+	);
 
-		add_settings_field(
-			'primary_items',
-			__( 'Primary Items', 'interslide-vertical-menu' ),
+	add_settings_field(
+		'use_wp_menus',
+		__( 'Use WordPress menus', 'interslide-vertical-menu' ),
+		array( $this, 'render_checkbox_field' ),
+		'interslide-vertical-menu',
+		'ivm_menu_items',
+		array(
+			'label_for'   => 'ivm_use_wp_menus',
+			'option_key'  => 'use_wp_menus',
+			'description' => __( 'Use menus defined in Appearance → Menus for the menu sections.', 'interslide-vertical-menu' ),
+		)
+	);
+
+	add_settings_field(
+		'primary_menu_id',
+		__( 'Primary menu', 'interslide-vertical-menu' ),
+		array( $this, 'render_menu_select_field' ),
+		'interslide-vertical-menu',
+		'ivm_menu_items',
+		array(
+			'label_for'  => 'ivm_primary_menu_id',
+			'option_key' => 'primary_menu_id',
+		)
+	);
+
+	add_settings_field(
+		'secondary_menu_id',
+		__( 'Secondary menu', 'interslide-vertical-menu' ),
+		array( $this, 'render_menu_select_field' ),
+		'interslide-vertical-menu',
+		'ivm_menu_items',
+		array(
+			'label_for'  => 'ivm_secondary_menu_id',
+			'option_key' => 'secondary_menu_id',
+		)
+	);
+
+	add_settings_field(
+		'bottom_menu_id',
+		__( 'Bottom menu', 'interslide-vertical-menu' ),
+		array( $this, 'render_menu_select_field' ),
+		'interslide-vertical-menu',
+		'ivm_menu_items',
+		array(
+			'label_for'  => 'ivm_bottom_menu_id',
+			'option_key' => 'bottom_menu_id',
+		)
+	);
+
+	add_settings_field(
+		'primary_items',
+		__( 'Primary Items', 'interslide-vertical-menu' ),
 			array( $this, 'render_items_field' ),
 			'interslide-vertical-menu',
 			'ivm_menu_items',
@@ -505,12 +574,16 @@ class Interslide_Vertical_Menu_Plugin {
 		$output['mobile_breakpoint']    = $this->sanitize_number( $input['mobile_breakpoint'] ?? $defaults['mobile_breakpoint'], 600, 1600 );
 		$output['search_mode']          = ( 'inline' === ( $input['search_mode'] ?? '' ) ) ? 'inline' : 'link';
 		$output['search_url']           = esc_url_raw( $input['search_url'] ?? $defaults['search_url'] );
-		$output['edition_enabled']      = isset( $input['edition_enabled'] ) ? 1 : 0;
-		$output['edition_options']      = $this->sanitize_items( $input['edition_options'] ?? array(), false );
-		$output['edition_default']      = $this->sanitize_number( $input['edition_default'] ?? $defaults['edition_default'], 0, 5 );
-		$output['hide_theme_menu']      = isset( $input['hide_theme_menu'] ) ? 1 : 0;
-		$output['hide_selectors']       = $this->sanitize_selectors( $input['hide_selectors'] ?? $defaults['hide_selectors'] );
-		$output['cleanup_on_uninstall'] = isset( $input['cleanup_on_uninstall'] ) ? 1 : 0;
+	$output['edition_enabled']      = isset( $input['edition_enabled'] ) ? 1 : 0;
+	$output['edition_options']      = $this->sanitize_items( $input['edition_options'] ?? array(), false );
+	$output['edition_default']      = $this->sanitize_number( $input['edition_default'] ?? $defaults['edition_default'], 0, 5 );
+	$output['use_wp_menus']         = isset( $input['use_wp_menus'] ) ? 1 : 0;
+	$output['primary_menu_id']      = absint( $input['primary_menu_id'] ?? 0 );
+	$output['secondary_menu_id']    = absint( $input['secondary_menu_id'] ?? 0 );
+	$output['bottom_menu_id']       = absint( $input['bottom_menu_id'] ?? 0 );
+	$output['hide_theme_menu']      = isset( $input['hide_theme_menu'] ) ? 1 : 0;
+	$output['hide_selectors']       = $this->sanitize_selectors( $input['hide_selectors'] ?? $defaults['hide_selectors'] );
+	$output['cleanup_on_uninstall'] = isset( $input['cleanup_on_uninstall'] ) ? 1 : 0;
 
 		return $output;
 	}
@@ -715,6 +788,7 @@ class Interslide_Vertical_Menu_Plugin {
 				?>
 			</form>
 			<p><?php echo esc_html__( 'Available icons: flag, globe, leaf, robot, ticket, health, economy, sport, search, article, doc, podcast.', 'interslide-vertical-menu' ); ?></p>
+			<p><?php echo esc_html__( 'To show an icon on a menu item, add a CSS class like ivm-icon-flag in Appearance → Menus.', 'interslide-vertical-menu' ); ?></p>
 		</div>
 		<?php
 	}
@@ -779,6 +853,23 @@ class Interslide_Vertical_Menu_Plugin {
 		?>
 		<p><em><?php echo esc_html( $args['label'] ); ?></em></p>
 		<textarea id="<?php echo esc_attr( $id ); ?>" name="<?php echo esc_attr( $this->option_name . '[' . $key . ']' ); ?>" rows="6" cols="60" class="large-text code"><?php echo esc_textarea( $items ); ?></textarea>
+		<?php
+	}
+
+	public function render_menu_select_field( $args ) {
+		$settings = $this->get_settings();
+		$key = $args['option_key'];
+		$id  = 'ivm_' . $key;
+		$menus = wp_get_nav_menus();
+		?>
+		<select id="<?php echo esc_attr( $id ); ?>" name="<?php echo esc_attr( $this->option_name . '[' . $key . ']' ); ?>">
+			<option value="0"><?php echo esc_html__( 'Select a menu', 'interslide-vertical-menu' ); ?></option>
+			<?php foreach ( $menus as $menu ) : ?>
+				<option value="<?php echo esc_attr( $menu->term_id ); ?>" <?php selected( $settings[ $key ], $menu->term_id ); ?>>
+					<?php echo esc_html( $menu->name ); ?>
+				</option>
+			<?php endforeach; ?>
+		</select>
 		<?php
 	}
 
@@ -922,57 +1013,35 @@ class Interslide_Vertical_Menu_Plugin {
 					<?php endif; ?>
 				</div>
 				<div class="ivm__section">
-					<ul class="ivm__list">
-						<?php foreach ( $settings['primary_items'] as $item ) : ?>
-							<li>
-								<a href="<?php echo esc_url( $item['url'] ); ?>" class="ivm__link">
-									<?php if ( ! empty( $item['icon'] ) ) : ?>
-										<span class="ivm__icon" aria-hidden="true"><?php echo $this->get_icon_svg( $item['icon'] ); ?></span>
-									<?php endif; ?>
-									<span class="ivm__label"><?php echo esc_html( $item['label'] ); ?></span>
-								</a>
-							</li>
-						<?php endforeach; ?>
-					</ul>
+					<?php echo $this->render_menu_section( $settings, 'primary', $settings['primary_items'] ); ?>
 				</div>
 				<hr class="ivm__divider" />
 				<div class="ivm__section">
-					<ul class="ivm__list">
-						<?php foreach ( $settings['secondary_items'] as $item ) : ?>
-							<li>
-								<a href="<?php echo esc_url( $item['url'] ); ?>" class="ivm__link">
-									<?php if ( ! empty( $item['icon'] ) ) : ?>
-										<span class="ivm__icon" aria-hidden="true"><?php echo $this->get_icon_svg( $item['icon'] ); ?></span>
-									<?php endif; ?>
-									<span class="ivm__label"><?php echo esc_html( $item['label'] ); ?></span>
-								</a>
-							</li>
-						<?php endforeach; ?>
-						<?php if ( 'link' === $settings['search_mode'] && $settings['search_url'] ) : ?>
+					<?php echo $this->render_menu_section( $settings, 'secondary', $settings['secondary_items'] ); ?>
+					<?php if ( 'link' === $settings['search_mode'] && $settings['search_url'] ) : ?>
+						<ul class="ivm__list">
 							<li>
 								<a href="<?php echo esc_url( $settings['search_url'] ); ?>" class="ivm__link">
 									<span class="ivm__icon" aria-hidden="true"><?php echo $this->get_icon_svg( 'search' ); ?></span>
 									<span class="ivm__label"><?php echo esc_html__( 'Search', 'interslide-vertical-menu' ); ?></span>
 								</a>
 							</li>
-						<?php endif; ?>
-						<?php if ( 'inline' === $settings['search_mode'] ) : ?>
+						</ul>
+					<?php endif; ?>
+					<?php if ( 'inline' === $settings['search_mode'] ) : ?>
+						<ul class="ivm__list">
 							<li class="ivm__search">
 								<form role="search" method="get" action="<?php echo esc_url( home_url( '/' ) ); ?>">
 									<label class="screen-reader-text" for="ivm-search-input"><?php echo esc_html__( 'Search', 'interslide-vertical-menu' ); ?></label>
 									<input id="ivm-search-input" type="search" name="s" placeholder="<?php echo esc_attr__( 'Search…', 'interslide-vertical-menu' ); ?>" />
 								</form>
 							</li>
-						<?php endif; ?>
-					</ul>
+						</ul>
+					<?php endif; ?>
 				</div>
 				<hr class="ivm__divider" />
 				<div class="ivm__section">
-					<ul class="ivm__list">
-						<?php foreach ( $settings['bottom_items'] as $item ) : ?>
-							<li><a href="<?php echo esc_url( $item['url'] ); ?>" class="ivm__link"><span class="ivm__label"><?php echo esc_html( $item['label'] ); ?></span></a></li>
-						<?php endforeach; ?>
-					</ul>
+					<?php echo $this->render_menu_section( $settings, 'bottom', $settings['bottom_items'] ); ?>
 				</div>
 				<?php if ( $settings['edition_enabled'] && ! empty( $settings['edition_options'] ) ) : ?>
 					<div class="ivm__edition">
@@ -988,5 +1057,76 @@ class Interslide_Vertical_Menu_Plugin {
 		</nav>
 		<?php
 		return ob_get_clean();
+	}
+
+	private function render_menu_section( $settings, $section, $fallback_items ) {
+		$menu_id = 0;
+		if ( 'primary' === $section ) {
+			$menu_id = (int) $settings['primary_menu_id'];
+		} elseif ( 'secondary' === $section ) {
+			$menu_id = (int) $settings['secondary_menu_id'];
+		} elseif ( 'bottom' === $section ) {
+			$menu_id = (int) $settings['bottom_menu_id'];
+		}
+
+		if ( $settings['use_wp_menus'] && $menu_id ) {
+			return wp_nav_menu(
+				array(
+					'menu'        => $menu_id,
+					'container'   => false,
+					'echo'        => false,
+					'menu_class'  => 'ivm__list',
+					'fallback_cb' => '__return_false',
+					'walker'      => new Interslide_Vertical_Menu_Walker( $this ),
+				)
+			);
+		}
+
+		ob_start();
+		?>
+		<ul class="ivm__list">
+			<?php foreach ( $fallback_items as $item ) : ?>
+				<li>
+					<a href="<?php echo esc_url( $item['url'] ); ?>" class="ivm__link">
+						<?php if ( ! empty( $item['icon'] ) ) : ?>
+							<span class="ivm__icon" aria-hidden="true"><?php echo $this->get_icon_svg( $item['icon'] ); ?></span>
+						<?php endif; ?>
+						<span class="ivm__label"><?php echo esc_html( $item['label'] ); ?></span>
+					</a>
+				</li>
+			<?php endforeach; ?>
+		</ul>
+		<?php
+		return ob_get_clean();
+	}
+}
+
+class Interslide_Vertical_Menu_Walker extends Walker_Nav_Menu {
+	private $plugin;
+
+	public function __construct( $plugin ) {
+		$this->plugin = $plugin;
+	}
+
+	public function start_el( &$output, $item, $depth = 0, $args = array(), $id = 0 ) {
+		$icon = '';
+		if ( ! empty( $item->classes ) && is_array( $item->classes ) ) {
+			foreach ( $item->classes as $class ) {
+				if ( 0 === strpos( $class, 'ivm-icon-' ) ) {
+					$icon_key = substr( $class, strlen( 'ivm-icon-' ) );
+					$icon = $this->plugin->get_icon_svg( sanitize_key( $icon_key ) );
+					break;
+				}
+			}
+		}
+
+		$output .= '<li>';
+		$output .= '<a class="ivm__link" href="' . esc_url( $item->url ) . '">';
+		if ( $icon ) {
+			$output .= '<span class="ivm__icon" aria-hidden="true">' . $icon . '</span>';
+		}
+		$output .= '<span class="ivm__label">' . esc_html( $item->title ) . '</span>';
+		$output .= '</a>';
+		$output .= '</li>';
 	}
 }

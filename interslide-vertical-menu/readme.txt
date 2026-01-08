@@ -21,6 +21,7 @@ Add a minimal, brut-style vertical menu inspired by brute.media. Includes global
 * Shortcode mode: Use `[interslide_vertical_menu mode="fixed"]` or `[interslide_vertical_menu mode="drawer" width="280" theme="light"]`.
 * Block mode: Add the “Interslide Menu” block in the editor.
 * To replace your theme menu: enable “Hide existing theme menu” and adjust the selector list if needed.
+* WordPress menus: create menus in Appearance → Menus and assign them in the plugin settings. Add icon classes like `ivm-icon-flag` to menu items.
 
 == FAQ ==
 = Does the plugin include a search field? =
