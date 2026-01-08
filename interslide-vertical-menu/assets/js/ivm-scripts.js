@@ -59,19 +59,28 @@
 		}
 	}
 
+	function handleToggle(event, menu, state) {
+		event.preventDefault();
+		event.stopPropagation();
+		if (menu.classList.contains('ivm--open')) {
+			closeMenu(menu, state);
+		} else {
+			openMenu(menu, state);
+		}
+	}
+
 	menus.forEach(function (menu) {
 		var state = getMenuState(menu);
 		if (!state.panel || !state.toggle || !state.overlay) {
 			return;
 		}
 
-		state.toggle.addEventListener('click', function () {
-			if (menu.classList.contains('ivm--open')) {
-				closeMenu(menu, state);
-			} else {
-				openMenu(menu, state);
-			}
+		state.toggle.addEventListener('click', function (event) {
+			handleToggle(event, menu, state);
 		});
+		state.toggle.addEventListener('touchstart', function (event) {
+			handleToggle(event, menu, state);
+		}, { passive: false });
 
 		state.overlay.addEventListener('click', function () {
 			closeMenu(menu, state);
@@ -110,11 +119,7 @@
 		if (!state.panel || !state.toggle || !state.overlay) {
 			return;
 		}
-		if (menu.classList.contains('ivm--open')) {
-			closeMenu(menu, state);
-		} else {
-			openMenu(menu, state);
-		}
+		handleToggle(event, menu, state);
 	});
 
 	menus.forEach(function (menu) {
