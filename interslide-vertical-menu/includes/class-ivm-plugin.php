@@ -85,6 +85,7 @@ class Interslide_Vertical_Menu_Plugin {
 			'newsletter_url'     => home_url( '/' ),
 			'utility_links'      => $this->get_default_utility_links(),
 			'trending_topics'    => $this->get_default_trending_topics(),
+			'trending_term_ids'  => array(),
 			'trending_label'     => __( 'Trending', 'interslide-vertical-menu' ),
 			'account_enabled'    => 0,
 			'account_text'       => __( 'Sign in', 'interslide-vertical-menu' ),
@@ -332,6 +333,17 @@ class Interslide_Vertical_Menu_Plugin {
 			array(
 				'option_key' => 'trending_topics',
 				'label'      => __( 'Label|URL (one per line).', 'interslide-vertical-menu' ),
+			)
+		);
+
+		add_settings_field(
+			'trending_terms',
+			__( 'Trending taxonomy terms', 'interslide-vertical-menu' ),
+			array( $this, 'render_trending_terms_field' ),
+			'interslide-vertical-menu',
+			'ivm_menu_items',
+			array(
+				'option_key' => 'trending_term_ids',
 			)
 		);
 
@@ -1077,6 +1089,7 @@ class Interslide_Vertical_Menu_Plugin {
 		$output['newsletter_url']       = esc_url_raw( $input['newsletter_url'] ?? $defaults['newsletter_url'] );
 		$output['utility_links']        = $this->sanitize_items( $input['utility_links'] ?? array(), false );
 		$output['trending_topics']      = $this->sanitize_items( $input['trending_topics'] ?? array(), false );
+		$output['trending_term_ids']    = $this->sanitize_trending_term_ids( $input['trending_term_ids'] ?? array() );
 		$output['trending_label']       = sanitize_text_field( $input['trending_label'] ?? $defaults['trending_label'] );
 		$output['account_enabled']      = isset( $input['account_enabled'] ) ? 1 : 0;
 		$output['account_text']         = sanitize_text_field( $input['account_text'] ?? $defaults['account_text'] );
@@ -1213,6 +1226,35 @@ class Interslide_Vertical_Menu_Plugin {
 			return 'divider' !== $item && in_array( $item, $allowed, true );
 		} );
 		return array_values( array_unique( $items ) );
+	}
+
+	private function sanitize_trending_term_ids( $value ) {
+		$items = array();
+		if ( is_array( $value ) ) {
+			$items = $value;
+		} elseif ( is_string( $value ) ) {
+			$items = array_map( 'trim', explode( ',', $value ) );
+		}
+		$ids = array_filter( array_map( 'absint', $items ) );
+		if ( empty( $ids ) ) {
+			return array();
+		}
+		$taxonomies = $this->get_trending_taxonomies();
+		if ( empty( $taxonomies ) ) {
+			return array();
+		}
+		$terms = get_terms(
+			array(
+				'taxonomy'   => $taxonomies,
+				'include'    => $ids,
+				'hide_empty' => false,
+			)
+		);
+		if ( is_wp_error( $terms ) ) {
+			return array();
+		}
+		$valid_ids = wp_list_pluck( $terms, 'term_id' );
+		return array_values( array_intersect( $ids, $valid_ids ) );
 	}
 
 	private function sanitize_items( $items, $allow_icon ) {
@@ -1617,6 +1659,57 @@ class Interslide_Vertical_Menu_Plugin {
 		<?php
 	}
 
+	public function render_trending_terms_field( $args ) {
+		$settings = $this->get_settings();
+		$key = $args['option_key'];
+		$id = 'ivm_' . $key;
+		$selected = $settings[ $key ] ?? array();
+		$taxonomies = $this->get_trending_taxonomies();
+		if ( empty( $taxonomies ) ) {
+			echo '<p><em>' . esc_html__( 'No tag-based taxonomies are available.', 'interslide-vertical-menu' ) . '</em></p>';
+			return;
+		}
+		$terms = get_terms(
+			array(
+				'taxonomy'   => $taxonomies,
+				'hide_empty' => false,
+				'orderby'    => 'name',
+				'order'      => 'ASC',
+			)
+		);
+		if ( empty( $terms ) || is_wp_error( $terms ) ) {
+			echo '<p><em>' . esc_html__( 'No tags found for the selected taxonomies.', 'interslide-vertical-menu' ) . '</em></p>';
+			return;
+		}
+		$taxonomy_labels = array();
+		foreach ( $taxonomies as $taxonomy ) {
+			$taxonomy_object = get_taxonomy( $taxonomy );
+			$taxonomy_labels[ $taxonomy ] = $taxonomy_object ? $taxonomy_object->labels->name : $taxonomy;
+		}
+		?>
+		<fieldset id="<?php echo esc_attr( $id ); ?>">
+			<p><em><?php echo esc_html__( 'Select tags or hashtags to add to the trending topics list.', 'interslide-vertical-menu' ); ?></em></p>
+			<?php foreach ( $taxonomy_labels as $taxonomy => $label ) : ?>
+				<strong style="display:block;margin:10px 0 6px;"><?php echo esc_html( $label ); ?></strong>
+				<?php foreach ( $terms as $term ) : ?>
+					<?php if ( $term->taxonomy !== $taxonomy ) : ?>
+						<?php continue; ?>
+					<?php endif; ?>
+					<label style="display:block;margin-bottom:4px;">
+						<input
+							type="checkbox"
+							name="<?php echo esc_attr( $this->option_name . '[' . $key . '][]' ); ?>"
+							value="<?php echo esc_attr( $term->term_id ); ?>"
+							<?php checked( in_array( $term->term_id, $selected, true ) ); ?>
+						/>
+						<?php echo esc_html( $term->name ); ?>
+					</label>
+				<?php endforeach; ?>
+			<?php endforeach; ?>
+		</fieldset>
+		<?php
+	}
+
 	public function render_menu_select_field( $args ) {
 		$settings = $this->get_settings();
 		$key = $args['option_key'];
@@ -1718,6 +1811,63 @@ class Interslide_Vertical_Menu_Plugin {
 			array( 'label' => __( 'Tech', 'interslide-vertical-menu' ), 'url' => home_url( '/technologie/' ) ),
 			array( 'label' => __( 'Culture', 'interslide-vertical-menu' ), 'url' => home_url( '/culture/' ) ),
 		);
+	}
+
+	private function get_trending_taxonomies() {
+		$taxonomies = array( 'post_tag', 'hashtag' );
+		return array_values(
+			array_filter(
+				$taxonomies,
+				function ( $taxonomy ) {
+					return taxonomy_exists( $taxonomy );
+				}
+			)
+		);
+	}
+
+	private function get_trending_items( $settings ) {
+		$items = $settings['trending_topics'] ?? array();
+		$term_ids = $settings['trending_term_ids'] ?? array();
+		if ( empty( $term_ids ) ) {
+			return $items;
+		}
+		$taxonomies = $this->get_trending_taxonomies();
+		if ( empty( $taxonomies ) ) {
+			return $items;
+		}
+		$terms = get_terms(
+			array(
+				'taxonomy'   => $taxonomies,
+				'include'    => $term_ids,
+				'hide_empty' => false,
+			)
+		);
+		if ( empty( $terms ) || is_wp_error( $terms ) ) {
+			return $items;
+		}
+		$existing = array();
+		foreach ( $items as $item ) {
+			if ( empty( $item['label'] ) || empty( $item['url'] ) ) {
+				continue;
+			}
+			$existing[ $item['label'] . '|' . $item['url'] ] = true;
+		}
+		foreach ( $terms as $term ) {
+			$link = get_term_link( $term );
+			if ( is_wp_error( $link ) ) {
+				continue;
+			}
+			$key = $term->name . '|' . $link;
+			if ( isset( $existing[ $key ] ) ) {
+				continue;
+			}
+			$existing[ $key ] = true;
+			$items[] = array(
+				'label' => $term->name,
+				'url'   => $link,
+			);
+		}
+		return $items;
 	}
 
 	private function get_default_editions() {
@@ -1837,7 +1987,8 @@ class Interslide_Vertical_Menu_Plugin {
 				<?php
 				return ob_get_clean();
 			case 'trending':
-				if ( empty( $settings['trending_topics'] ) ) {
+				$trending_items = $this->get_trending_items( $settings );
+				if ( empty( $trending_items ) ) {
 					return '';
 				}
 				$trending_label = $settings['trending_label'] ? $settings['trending_label'] : __( 'Trending', 'interslide-vertical-menu' );
@@ -1846,7 +1997,7 @@ class Interslide_Vertical_Menu_Plugin {
 				<div class="ivm__trending">
 					<span class="ivm__trending-label"><?php echo esc_html( $trending_label ); ?></span>
 					<div class="ivm__trending-items">
-						<?php foreach ( $settings['trending_topics'] as $item ) : ?>
+						<?php foreach ( $trending_items as $item ) : ?>
 							<a class="ivm__chip" href="<?php echo esc_url( $item['url'] ); ?>"><?php echo esc_html( $item['label'] ); ?></a>
 						<?php endforeach; ?>
 					</div>
